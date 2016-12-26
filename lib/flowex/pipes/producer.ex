@@ -1,6 +1,10 @@
 defmodule Flowex.Producer do
   use Experimental.GenStage
 
+  def start_link(state) do
+    Experimental.GenStage.start_link(__MODULE__, state)
+  end
+
   def init(_), do: {:producer, [], demand: :accumulate}
 
   def handle_demand(_demand, [ip | ips]) do

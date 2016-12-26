@@ -1,6 +1,10 @@
 defmodule Flowex.Consumer do
   use Experimental.GenStage
 
+  def start_link(state) do
+    Experimental.GenStage.start_link(__MODULE__, state)
+  end
+
   def init(subscribe_to \\ []) do
     subscribe_to = Enum.map(subscribe_to, &({&1,  max_demand: 1}))
     {:consumer, nil, subscribe_to: subscribe_to}

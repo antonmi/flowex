@@ -17,7 +17,7 @@ defmodule Flowex.Pipeline do
       @before_compile Flowex.Pipeline
 
       def start(opts \\ %{}) do
-        {:ok, in_producer} = Experimental.GenStage.start_link(Flowex.Producer, nil)
+        {:ok, in_producer} = Flowex.Producer.start_link(nil)
 
         last_pids = pipes()
         |> Enum.reduce([in_producer], fn({atom, count}, prev_pids) ->
@@ -32,18 +32,18 @@ defmodule Flowex.Pipeline do
           pids
         end)
 
-        {:ok, out_consumer} = Experimental.GenStage.start_link(Flowex.Consumer, last_pids)
+        {:ok, out_consumer} = Flowex.Consumer.start_link(last_pids)
         Experimental.GenStage.demand(in_producer, :forward)
         %Flowex.Pipeline{module: __MODULE__, in_pid: in_producer, out_pid: out_consumer}
       end
 
       defp init_function_pipe({function, opts}, prev_pids) do
-        Experimental.GenStage.start_link(Flowex.Stage, {__MODULE__, function, opts, prev_pids})
+        Flowex.Stage.start_link({__MODULE__, function, opts, prev_pids})
       end
 
       defp init_module_pipe({module, opts}, prev_pids) do
         opts = module.init(opts)
-        Experimental.GenStage.start_link(Flowex.Stage, {module, :call, opts, prev_pids})
+        Flowex.Stage.start_link({module, :call, opts, prev_pids})
       end
     end
   end
