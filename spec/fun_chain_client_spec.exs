@@ -1,21 +1,22 @@
 defmodule FunChainClientSpec do
   use ESpec, async: true
 
+  let :opts, do: %{a: :a, b: :b, c: :c}
+
   describe "FlowexClient" do
-    let :chain, do: FunChain.start
+    let :chain, do: FunChain.start(opts())
 
     describe ".start" do
       let_ok :client_pid, do: Flowex.Client.start(chain())
 
-      it do: assert(Process.alive?(client_pid()) == true)
+      it do: assert Process.alive?(client_pid()) == true
 
       describe ".stop" do
         before do: Flowex.Client.stop(client_pid())
 
-        it do: assert(Process.alive?(client_pid()) == false)
+        it do: assert Process.alive?(client_pid()) == false
       end
     end
-
 
     describe ".run" do
       let_ok :client_pid, do: Flowex.Client.start(chain())
@@ -34,7 +35,7 @@ defmodule FunChainClientSpec do
 
         it "returns the same results" do
           expected = Enum.map(attempts(), fn(_) -> 4 end)
-          expect(shared.numbers) |> to(eq expected)
+          assert shared.numbers == expected
         end
       end
     end
@@ -42,7 +43,7 @@ defmodule FunChainClientSpec do
     describe ".run!" do
       let! :result, do: Flowex.Client.run!(chain(), %FunChain{})
 
-      it do: expect(result().number) |> to(eq 4)
+      it do: assert result().number ==  4
 
       context "when running several times" do
         let :attempts, do: (1..3)
@@ -55,7 +56,7 @@ defmodule FunChainClientSpec do
 
         it "returns the same results" do
           expected = Enum.map(attempts(), fn(_) -> 4 end)
-          expect(shared.numbers) |> to(eq expected)
+          assert shared.numbers == expected
         end
       end
     end

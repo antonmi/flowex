@@ -16,27 +16,23 @@ defmodule Flowex.Chain do
 
       @before_compile Flowex.Chain
 
-      def start do
+      def start(opts \\ %{}) do
         {:ok, in_producer} = Experimental.GenStage.start_link(Flowex.Producer, nil)
 
         last_pids = components()
         |> Enum.reduce([in_producer], fn({function, count}, prev_pids) ->
           pids = (1..count)
           |> Enum.map(fn(i) ->
-            {:ok, pid} = Experimental.GenStage.start_link(Flowex.Component, {__MODULE__, function, prev_pids})
+            {:ok, pid} = Experimental.GenStage.start_link(Flowex.Component, {__MODULE__, function, opts, prev_pids})
             pid
           end)
           pids
         end)
 
         {:ok, out_consumer} = Experimental.GenStage.start_link(Flowex.Consumer, last_pids)
-
         Experimental.GenStage.demand(in_producer, :forward)
-
         %Flowex.Chain{module: __MODULE__, in_pid: in_producer, out_pid: out_consumer}
       end
-
-
     end
   end
 
