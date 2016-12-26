@@ -1,16 +1,16 @@
-defmodule FunChainSpec do
+defmodule FunPipelineSpec do
   use ESpec, async: true
 
   describe ".start" do
-    let :chain, do: FunChain.start
+    let :pipeline, do: FunPipeline.start
 
-    describe "chain struct" do
-      it do: expect(chain()) |> to(be_struct Flowex.Chain)
-      it do: expect(chain().module) |> to(eq FunChain)
-      it do: expect(chain().in_pid) |> to(be_pid())
-      it do: expect(chain().out_pid) |> to(be_pid())
+    describe "pipeline struct" do
+      it do: expect(pipeline()) |> to(be_struct Flowex.Pipeline)
+      it do: expect(pipeline().module) |> to(eq FunPipeline)
+      it do: expect(pipeline().in_pid) |> to(be_pid())
+      it do: expect(pipeline().out_pid) |> to(be_pid())
 
-      xit do: expect(chain().sup_pid) |> to(be_pid())
+      xit do: expect(pipeline().sup_pid) |> to(be_pid())
     end
   end
 
@@ -20,8 +20,8 @@ defmodule FunChainSpec do
 
   describe ".run" do
     let :opts, do: %{a: :a, b: :b, c: :c}
-    let :chain, do: FunChain.start(opts())
-    let :output, do: FunChain.run(chain(), %FunChain{})
+    let :pipeline, do: FunPipeline.start(opts())
+    let :output, do: FunPipeline.run(pipeline(), %FunPipeline{})
 
     it do: assert output().number == 4
 
@@ -35,7 +35,7 @@ defmodule FunChainSpec do
       let :attempts, do: (1..3)
 
       before do
-        numbers = Enum.map(attempts(), fn(_) -> FunChain.run(chain(), %FunChain{}).number end)
+        numbers = Enum.map(attempts(), fn(_) -> FunPipeline.run(pipeline(), %FunPipeline{}).number end)
         {:ok, numbers: numbers}
       end
 

@@ -1,4 +1,4 @@
-defmodule Flowex.Component do
+defmodule Flowex.Stage do
   use Experimental.GenStage
 
   def init({module, function, opts, subscribe_to}) do

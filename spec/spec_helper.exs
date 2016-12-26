@@ -8,4 +8,4 @@ ESpec.configure fn(config) ->
   end
 end
 
-Code.require_file("spec/support/fun_chain.ex")
+Code.require_file("spec/support/fun_pipeline.ex")

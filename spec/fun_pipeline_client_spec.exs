@@ -1,13 +1,12 @@
-defmodule FunChainClientSpec do
+defmodule FunPipelineClientSpec do
   use ESpec, async: true
 
-  let :opts, do: %{a: :a, b: :b, c: :c}
-
   describe "FlowexClient" do
-    let :chain, do: FunChain.start(opts())
+    let :opts, do: %{a: :a, b: :b, c: :c}
+    let :pipeline, do: FunPipeline.start(opts())
 
     describe ".start" do
-      let_ok :client_pid, do: Flowex.Client.start(chain())
+      let_ok :client_pid, do: Flowex.Client.start(pipeline())
 
       it do: assert Process.alive?(client_pid()) == true
 
@@ -19,17 +18,23 @@ defmodule FunChainClientSpec do
     end
 
     describe ".run" do
-      let_ok :client_pid, do: Flowex.Client.start(chain())
-      let :result, do: Flowex.Client.run(client_pid(), %FunChain{})
+      let_ok :client_pid, do: Flowex.Client.start(pipeline())
+      let :result, do: Flowex.Client.run(client_pid(), %FunPipeline{})
 
       it do: expect(result().number) |> to(eq 4)
+
+      it "sets a, b, c" do
+        assert result().a == :a
+        assert result().b == :b
+        assert result().c == :c
+      end
 
       context "when running several times" do
         let :attempts, do: (1..3)
 
         before do
           numbers = attempts()
-          |> Enum.map(fn(_) -> Flowex.Client.run(client_pid(), %FunChain{}).number end)
+          |> Enum.map(fn(_) -> Flowex.Client.run(client_pid(), %FunPipeline{}).number end)
           {:ok, numbers: numbers}
         end
 
@@ -41,16 +46,22 @@ defmodule FunChainClientSpec do
     end
 
     describe ".run!" do
-      let! :result, do: Flowex.Client.run!(chain(), %FunChain{})
+      let! :result, do: Flowex.Client.run!(pipeline(), %FunPipeline{})
 
       it do: assert result().number ==  4
+
+      it "sets a, b, c" do
+        assert result().a == :a
+        assert result().b == :b
+        assert result().c == :c
+      end
 
       context "when running several times" do
         let :attempts, do: (1..3)
 
         before do
           numbers = attempts()
-          |> Enum.map(fn(_) -> Flowex.Client.run!(chain(), %FunChain{}).number end)
+          |> Enum.map(fn(_) -> Flowex.Client.run!(pipeline(), %FunPipeline{}).number end)
           {:ok, numbers: numbers}
         end
 

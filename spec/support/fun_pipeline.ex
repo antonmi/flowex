@@ -1,11 +1,11 @@
-defmodule FunChain do
-  use Flowex.Chain
+defmodule FunPipeline do
+  use Flowex.Pipeline
 
   defstruct number: nil, a: nil, b: nil, c: nil
 
-  component :init_data, 1
-  component :add_one, 2
-  component :multiply_by_2, 2
+  pipe :init_data, 1
+  pipe :add_one, 2
+  pipe :multiply_by_2, 2
 
   def init_data(struct, opts) do
     %{struct | number: 1, a: opts.a}

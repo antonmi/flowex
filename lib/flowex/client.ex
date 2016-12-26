@@ -1,31 +1,31 @@
 defmodule Flowex.Client do
   use GenServer
 
-  def start(chain) do
-    GenServer.start_link(__MODULE__, chain)
+  def start(pipeline) do
+    GenServer.start_link(__MODULE__, pipeline)
   end
 
   def stop(pid) do
     GenServer.stop(pid)
   end
 
-  def init(chain) do
-    {:ok, chain}
+  def init(pipeline) do
+    {:ok, pipeline}
   end
 
-  def run(pid, data) do
-    GenServer.call(pid, {:run, data}, :infinity)
+  def run(pid, struct) do
+    GenServer.call(pid, {:run, struct}, :infinity)
   end
 
-  def run!(chain, data) do
-    {:ok, pid} = GenServer.start_link(__MODULE__, chain)
-    result = GenServer.call(pid, {:run, data}, :infinity)
+  def run!(pipeline, struct) do
+    {:ok, pid} = GenServer.start_link(__MODULE__, pipeline)
+    result = GenServer.call(pid, {:run, struct}, :infinity)
     GenServer.stop(pid)
     result
   end
 
-  def handle_call({:run, data}, _pid, chain) do
-    data = chain.module.run(chain, data)
-    {:reply, data, chain}
+  def handle_call({:run, struct}, _pid, pipeline) do
+    struct = pipeline.module.run(pipeline, struct)
+    {:reply, struct, pipeline}
   end
 end
