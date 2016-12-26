@@ -1,3 +1,3 @@
 defmodule Flowex.IP do
-  defstruct data: %{}, requester: nil
+  defstruct struct: nil, requester: nil
 end

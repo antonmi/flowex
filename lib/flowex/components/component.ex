@@ -7,7 +7,7 @@ defmodule Flowex.Component do
   end
 
   def handle_events([ip], _from, {module, function}) do
-    new_ip = %{ip | data: apply(module, function, [ip.data])}
+    new_ip = %{ip | struct: apply(module, function, [ip.struct])}
     {:noreply, [new_ip], {module, function}}
   end
 end

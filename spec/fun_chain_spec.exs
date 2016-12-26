@@ -1,8 +1,8 @@
 defmodule FunChainSpec do
-  use ESpec
+  use ESpec, async: true
 
-  describe ".init" do
-    let :chain, do: FunChain.init
+  describe ".start" do
+    let :chain, do: FunChain.start
 
     describe "chain struct" do
       it do: expect(chain()) |> to(be_struct Flowex.Chain)
@@ -14,9 +14,13 @@ defmodule FunChainSpec do
     end
   end
 
+  describe ".stop" do
+    xit do: "not implemented yet"
+  end
+
   describe ".run" do
-    let :chain, do: FunChain.init
-    let :output, do: FunChain.run(chain, %{})
+    let :chain, do: FunChain.start
+    let :output, do: FunChain.run(chain(), %FunChain{})
 
     it do: expect(output().number) |> to(eq 4)
 
@@ -24,7 +28,7 @@ defmodule FunChainSpec do
       let :attempts, do: (1..3)
 
       before do
-        numbers = Enum.map(attempts(), fn(_) -> FunChain.run(chain(), %{}).number end)
+        numbers = Enum.map(attempts(), fn(_) -> FunChain.run(chain(), %FunChain{}).number end)
         {:ok, numbers: numbers}
       end
 

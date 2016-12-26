@@ -30,7 +30,7 @@ defmodule Flowex.Mixfile do
   defp deps do
     [
       {:gen_stage, "0.10.0"},
-      {:espec, "~> 1.2.0", only: :test}
+      {:espec, "~> 1.2.1", only: :test}
     ]
   end
 end

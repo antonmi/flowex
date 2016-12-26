@@ -16,7 +16,7 @@ defmodule Flowex.Chain do
 
       @before_compile Flowex.Chain
 
-      def init do
+      def start do
         {:ok, in_producer} = Experimental.GenStage.start_link(Flowex.Producer, nil)
 
         last_pids = components()
@@ -36,19 +36,21 @@ defmodule Flowex.Chain do
         %Flowex.Chain{module: __MODULE__, in_pid: in_producer, out_pid: out_consumer}
       end
 
-      def run(%Flowex.Chain{in_pid: in_pid, out_pid: out_pid}, data) do
-        ip = %Flowex.IP{data: data, requester: self()}
-        GenServer.cast(out_pid, {in_pid, ip})
-        receive do
-          ip -> ip.data
-        end
-      end
+
     end
   end
 
   defmacro __before_compile__(_env) do
     quote do
       def components, do: Enum.reverse(@components)
+
+      def run(%Flowex.Chain{in_pid: in_pid, out_pid: out_pid}, struct = %__MODULE__{}) do
+        ip = %Flowex.IP{struct: struct, requester: self()}
+        GenServer.cast(out_pid, {in_pid, ip})
+        receive do
+          ip -> ip.struct
+        end
+      end
     end
   end
 end
