@@ -1,12 +1,14 @@
-defmodule FunPipelineSpec do
+defmodule ModulePipelineSpec do
   use ESpec, async: true
 
+  let :opts, do: %{a: :a, b: :b, c: :c}
+
   describe ".start" do
-    let :pipeline, do: FunPipeline.start
+    let :pipeline, do: ModulePipeline.start(opts())
 
     describe "pipeline struct" do
       it do: expect(pipeline()) |> to(be_struct Flowex.Pipeline)
-      it do: expect(pipeline().module) |> to(eq FunPipeline)
+      it do: expect(pipeline().module) |> to(eq ModulePipeline)
       it do: expect(pipeline().in_pid) |> to(be_pid())
       it do: expect(pipeline().out_pid) |> to(be_pid())
 
@@ -19,16 +21,15 @@ defmodule FunPipelineSpec do
   end
 
   describe ".run" do
-    let :opts, do: %{a: :a, b: :b, c: :c}
-    let :pipeline, do: FunPipeline.start(opts())
-    let :output, do: FunPipeline.run(pipeline(), %FunPipeline{number: 2})
+    let :pipeline, do: ModulePipeline.start(opts())
+    let :output, do: ModulePipeline.run(pipeline(), %ModulePipeline{number: 2})
 
     it do: assert output().number == 3
 
     it "sets a, b, c" do
-      assert output().a == :a
-      assert output().b == :b
-      assert output().c == :c
+      assert output().a == :add_one
+      assert output().b == :mult_by_two
+      assert output().c == :minus_three
     end
 
     context "when running several times" do
@@ -36,7 +37,7 @@ defmodule FunPipelineSpec do
 
       before do
         numbers = Enum.map(attempts(), fn(_) ->
-          FunPipeline.run(pipeline(), %FunPipeline{number: 2}).number
+          ModulePipeline.run(pipeline(), %ModulePipeline{number: 2}).number
         end)
         {:ok, numbers: numbers}
       end

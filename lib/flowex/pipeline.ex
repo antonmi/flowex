@@ -1,9 +1,9 @@
 defmodule Flowex.Pipeline do
   defstruct module: nil, in_pid: nil, out_pid: nil, sup_pid: nil
 
-  defmacro pipe(function, count \\ 1) do
+  defmacro pipe(atom, count \\ 1) do
     quote do
-      @pipes unquote({function, count})
+      @pipes unquote({atom, count})
     end
   end
 
@@ -20,10 +20,13 @@ defmodule Flowex.Pipeline do
         {:ok, in_producer} = Experimental.GenStage.start_link(Flowex.Producer, nil)
 
         last_pids = pipes()
-        |> Enum.reduce([in_producer], fn({function, count}, prev_pids) ->
+        |> Enum.reduce([in_producer], fn({atom, count}, prev_pids) ->
           pids = (1..count)
           |> Enum.map(fn(i) ->
-            {:ok, pid} = Experimental.GenStage.start_link(Flowex.Stage, {__MODULE__, function, opts, prev_pids})
+            {:ok, pid} = case Atom.to_char_list(atom) do
+              ~c"Elixir." ++ _ -> init_module_pipe({atom, opts}, prev_pids)
+              _ ->  init_function_pipe({atom, opts}, prev_pids)
+            end
             pid
           end)
           pids
@@ -32,6 +35,15 @@ defmodule Flowex.Pipeline do
         {:ok, out_consumer} = Experimental.GenStage.start_link(Flowex.Consumer, last_pids)
         Experimental.GenStage.demand(in_producer, :forward)
         %Flowex.Pipeline{module: __MODULE__, in_pid: in_producer, out_pid: out_consumer}
+      end
+
+      defp init_function_pipe({function, opts}, prev_pids) do
+        Experimental.GenStage.start_link(Flowex.Stage, {__MODULE__, function, opts, prev_pids})
+      end
+
+      defp init_module_pipe({module, opts}, prev_pids) do
+        opts = module.init(opts)
+        Experimental.GenStage.start_link(Flowex.Stage, {module, :call, opts, prev_pids})
       end
     end
   end
@@ -50,3 +62,5 @@ defmodule Flowex.Pipeline do
     end
   end
 end
+
+#

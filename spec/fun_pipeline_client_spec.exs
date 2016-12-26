@@ -19,9 +19,9 @@ defmodule FunPipelineClientSpec do
 
     describe ".run" do
       let_ok :client_pid, do: Flowex.Client.start(pipeline())
-      let :result, do: Flowex.Client.run(client_pid(), %FunPipeline{})
+      let :result, do: Flowex.Client.run(client_pid(), %FunPipeline{number: 2})
 
-      it do: expect(result().number) |> to(eq 4)
+      it do: expect(result().number) |> to(eq 3)
 
       it "sets a, b, c" do
         assert result().a == :a
@@ -34,21 +34,23 @@ defmodule FunPipelineClientSpec do
 
         before do
           numbers = attempts()
-          |> Enum.map(fn(_) -> Flowex.Client.run(client_pid(), %FunPipeline{}).number end)
+          |> Enum.map(fn(_) ->
+            Flowex.Client.run(client_pid(), %FunPipeline{number: 2}).number
+          end)
           {:ok, numbers: numbers}
         end
 
         it "returns the same results" do
-          expected = Enum.map(attempts(), fn(_) -> 4 end)
+          expected = Enum.map(attempts(), fn(_) -> 3 end)
           assert shared.numbers == expected
         end
       end
     end
 
     describe ".run!" do
-      let! :result, do: Flowex.Client.run!(pipeline(), %FunPipeline{})
+      let! :result, do: Flowex.Client.run!(pipeline(), %FunPipeline{number: 2})
 
-      it do: assert result().number ==  4
+      it do: assert result().number ==  3
 
       it "sets a, b, c" do
         assert result().a == :a
@@ -61,12 +63,14 @@ defmodule FunPipelineClientSpec do
 
         before do
           numbers = attempts()
-          |> Enum.map(fn(_) -> Flowex.Client.run!(pipeline(), %FunPipeline{}).number end)
+          |> Enum.map(fn(_) ->
+            Flowex.Client.run!(pipeline(), %FunPipeline{number: 2}).number
+          end)
           {:ok, numbers: numbers}
         end
 
         it "returns the same results" do
-          expected = Enum.map(attempts(), fn(_) -> 4 end)
+          expected = Enum.map(attempts(), fn(_) -> 3 end)
           assert shared.numbers == expected
         end
       end
