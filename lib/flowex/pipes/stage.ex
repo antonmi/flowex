@@ -1,7 +1,7 @@
 defmodule Flowex.Stage do
   use Experimental.GenStage
 
-  def start_link(state) do
+  def start_link(state, _opts \\ []) do
     Experimental.GenStage.start_link(__MODULE__, state)
   end
 

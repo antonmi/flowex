@@ -1,8 +1,8 @@
 defmodule Flowex.Consumer do
   use Experimental.GenStage
 
-  def start_link(state) do
-    Experimental.GenStage.start_link(__MODULE__, state)
+  def start_link(subscribe_to, _opts \\ []) do
+    Experimental.GenStage.start_link(__MODULE__, subscribe_to)
   end
 
   def init(subscribe_to \\ []) do

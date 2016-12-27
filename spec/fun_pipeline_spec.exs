@@ -4,18 +4,28 @@ defmodule FunPipelineSpec do
   describe ".start" do
     let :pipeline, do: FunPipeline.start
 
-    describe "pipeline struct" do
-      it do: expect(pipeline()) |> to(be_struct Flowex.Pipeline)
-      it do: expect(pipeline().module) |> to(eq FunPipeline)
-      it do: expect(pipeline().in_pid) |> to(be_pid())
-      it do: expect(pipeline().out_pid) |> to(be_pid())
-
-      xit do: expect(pipeline().sup_pid) |> to(be_pid())
+    it "checks pipeline struct" do
+      expect(pipeline()) |> to(be_struct Flowex.Pipeline)
+      expect(pipeline().module) |> to(eq FunPipeline)
+      expect(pipeline().in_pid) |> to(be_pid())
+      expect(pipeline().out_pid) |> to(be_pid())
+      expect(pipeline().sup_pid) |> to(be_pid())
     end
   end
 
   describe ".stop" do
-    xit do: "not implemented yet"
+    let! :pipeline, do: FunPipeline.start
+    let :sup_pid, do: pipeline().sup_pid
+    let! :pipe_pids do
+      Supervisor.which_children(sup_pid()) |> Enum.map(fn({_id, pid, :worker, [_]}) -> pid end)
+    end
+
+    it "stops supervisor" do
+      assert Process.alive?(sup_pid())
+      FunPipeline.stop(pipeline())
+      refute Process.alive?(sup_pid())
+      Enum.each(pipe_pids(), &(refute Process.alive?(&1)))
+    end
   end
 
   describe ".run" do
