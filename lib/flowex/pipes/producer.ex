@@ -5,24 +5,17 @@ defmodule Flowex.Producer do
     Experimental.GenStage.start_link(__MODULE__, nil, opts)
   end
 
-  def init(_), do: {:producer, [], demand: :accumulate}
+  def init(_), do: {:producer, []}
 
   def handle_demand(_demand, [ip | ips]) do
     {:noreply, [ip], ips}
   end
 
   def handle_demand(_demand, []) do
-    receive do
-      %Flowex.IP{} = ip ->
-        {:noreply, [ip], []}
-      {:DOWN, _ref, :process, _pid, :shutdown} ->
-        {:stop, :normal, []}
-      data ->
-        raise "Must be an Flowex.IP"
-    end
+    {:noreply, [], []}
   end
 
-  def handle_info(ip, ips) do
-    {:noreply, [], [ip | ips]}
+  def handle_cast(%Flowex.IP{} = ip, ips) do
+    {:noreply, [ip], ips}
   end
 end

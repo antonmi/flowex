@@ -16,7 +16,7 @@ defmodule Flowex.Consumer do
   end
 
   def handle_cast({in_name, ip}, nil) do
-    send(in_name, ip)
+    Experimental.GenStage.cast(in_name, ip)
     {:noreply, [], nil}
   end
 end

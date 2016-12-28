@@ -7,22 +7,19 @@ defmodule Flowex.PipelineBuilder do
 
     last_names = pipeline_module.pipes()
     |> Enum.reduce([producer_name], fn({atom, count}, prev_pids) ->
-      pids = (1..count)
+      (1..count)
       |> Enum.map(fn(i) ->
-        {:ok, pid} = case Atom.to_char_list(atom) do
+        case Atom.to_char_list(atom) do
           ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {atom, opts}, prev_pids)
           _ ->  init_function_pipe(sup_pid, {pipeline_module, atom, opts}, prev_pids)
         end
-        pid
       end)
-      pids
     end)
 
     consumer_name = String.to_atom("Flowex.Consumer_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Consumer, [last_names, [name: consumer_name]], [id: consumer_name])
-    {:ok, out_consumer} = Supervisor.start_child(sup_pid, worker_spec)
+    {:ok, _out_consumer_pid} = Supervisor.start_child(sup_pid, worker_spec)
 
-    Experimental.GenStage.demand(producer_name, :forward)
     %Flowex.Pipeline{module: pipeline_module, in_name: producer_name, out_name: consumer_name, sup_pid: sup_pid}
   end
 
@@ -36,14 +33,20 @@ defmodule Flowex.PipelineBuilder do
 
   defp init_function_pipe(sup_pid, {pipeline_module, function, opts}, prev_pids) do
     name = String.to_atom("#{__MODULE__}.#{function}_#{inspect make_ref()}")
-    worker_spec = worker(Flowex.Stage, [{pipeline_module, function, opts, prev_pids}, [name: name]], [id: name])
-    Supervisor.start_child(sup_pid, worker_spec)
+    worker_spec = worker(Flowex.Stage,
+                         [{pipeline_module, function, opts, prev_pids}, [name: name]],
+                         [id: name])
+    {:ok, _pid} = Supervisor.start_child(sup_pid, worker_spec)
+    name
   end
 
   defp init_module_pipe(sup_pid, {module, opts}, prev_pids) do
     opts = module.init(opts)
-    name = String.to_atom("#{__MODULE__}.call_#{inspect make_ref()}")
-    worker_spec = worker(Flowex.Stage, [{module, :call, opts, prev_pids}, [name: name]], [id: name])
-    Supervisor.start_child(sup_pid, worker_spec)
+    name = String.to_atom("#{module}.call_#{inspect make_ref()}")
+    worker_spec = worker(Flowex.Stage,
+                         [{module, :call, opts, prev_pids}, [name: name]],
+                         [id: name])
+    {:ok, _pid} = Supervisor.start_child(sup_pid, worker_spec)
+    name
   end
 end

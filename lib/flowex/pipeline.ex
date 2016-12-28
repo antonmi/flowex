@@ -31,9 +31,9 @@ defmodule Flowex.Pipeline do
       def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
         ip = %Flowex.IP{struct: struct, requester: self()}
         GenServer.cast(out_name, {in_name, ip})
-
         receive do
-          ip -> ip.struct
+          %Flowex.IP{} = ip -> ip.struct
+          smth -> raise "Expected %Flowex.IP{}, received #{inspect smth}"
         end
       end
     end
