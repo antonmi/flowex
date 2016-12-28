@@ -7,8 +7,8 @@ defmodule FunPipelineSpec do
     it "checks pipeline struct" do
       expect(pipeline()) |> to(be_struct Flowex.Pipeline)
       expect(pipeline().module) |> to(eq FunPipeline)
-      expect(pipeline().in_pid) |> to(be_pid())
-      expect(pipeline().out_pid) |> to(be_pid())
+      expect(pipeline().in_name) |> to(be_atom())
+      expect(pipeline().out_name) |> to(be_atom())
       expect(pipeline().sup_pid) |> to(be_pid())
     end
   end

@@ -1,5 +1,5 @@
 defmodule Flowex.Pipeline do
-  defstruct module: nil, in_pid: nil, out_pid: nil, sup_pid: nil
+  defstruct module: nil, in_name: nil, out_name: nil, sup_pid: nil
 
   defmacro pipe(atom, count \\ 1) do
     quote do
@@ -28,9 +28,10 @@ defmodule Flowex.Pipeline do
     quote do
       def pipes, do: Enum.reverse(@pipes)
 
-      def run(%Flowex.Pipeline{in_pid: in_pid, out_pid: out_pid}, struct = %__MODULE__{}) do
+      def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
         ip = %Flowex.IP{struct: struct, requester: self()}
-        GenServer.cast(out_pid, {in_pid, ip})
+        GenServer.cast(out_name, {in_name, ip})
+
         receive do
           ip -> ip.struct
         end

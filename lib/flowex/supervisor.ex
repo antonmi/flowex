@@ -6,8 +6,9 @@ defmodule Flowex.Supervisor do
   end
 
   def init(pipeline_module) do
+    name = String.to_atom("Flowex.Producer_#{inspect make_ref()}")
     children = [
-      worker(Flowex.Producer, [nil], id: {Flowex.Producer, nil, make_ref()})
+      worker(Flowex.Producer, [nil, [name: name]], id: name)
     ]
 
     supervise(children, strategy: :one_for_one)

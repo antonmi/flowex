@@ -1,8 +1,8 @@
 defmodule Flowex.Producer do
   use Experimental.GenStage
 
-  def start_link(nil, _opts \\ []) do
-    Experimental.GenStage.start_link(__MODULE__, nil)
+  def start_link(nil, opts \\ []) do
+    Experimental.GenStage.start_link(__MODULE__, nil, opts)
   end
 
   def init(_), do: {:producer, [], demand: :accumulate}
@@ -13,9 +13,12 @@ defmodule Flowex.Producer do
 
   def handle_demand(_demand, []) do
     receive do
-      %Flowex.IP{} = ip -> {:noreply, [ip], []}
-      {:DOWN, _ref, :process, _pid, :shutdown} ->  {:stop, :normal, []}
-      _ -> raise "Must be an Flowex.IP"
+      %Flowex.IP{} = ip ->
+        {:noreply, [ip], []}
+      {:DOWN, _ref, :process, _pid, :shutdown} ->
+        {:stop, :normal, []}
+      data ->
+        raise "Must be an Flowex.IP"
     end
   end
 

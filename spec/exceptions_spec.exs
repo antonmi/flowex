@@ -16,8 +16,7 @@ defmodule ExceptionsSpec do
     end
   end
 
-  let :pipeline, do: Pipeline.start
-  let :out, do: Pipeline.run(pipeline(), %Pipeline{data: 2})
+  let! :pipeline, do: Pipeline.start
 
   context "with crash" do
     before do
@@ -26,8 +25,10 @@ defmodule ExceptionsSpec do
       # Pipeline.run(pipeline(), %Pipeline{data: :fail})
     end
 
+    let! :out, do: Pipeline.run(pipeline(), %Pipeline{data: 2})
+
     it "adfas" do
-      # IO.inspect(out)
+      IO.inspect(out)
     end
   end
 
