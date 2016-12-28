@@ -4,8 +4,8 @@ defmodule FunPipeline do
   defstruct number: nil, a: nil, b: nil, c: nil
 
   pipe :add_one, 1
-  pipe :mult_by_two, 3
-  pipe :minus_three, 2
+  pipe :mult_by_two, 1
+  pipe :minus_three, 1
 
   def add_one(struct, opts) do
     # Process.sleep(1000)

@@ -21,6 +21,8 @@ defmodule ExceptionsSpec do
 
   context "with crash" do
     before do
+      Process.sleep(1000)
+      IO.inspect("Starting crash")
       # Pipeline.run(pipeline(), %Pipeline{data: :fail})
     end
 
