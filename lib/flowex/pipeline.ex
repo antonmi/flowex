@@ -29,10 +29,11 @@ defmodule Flowex.Pipeline do
       def pipes, do: Enum.reverse(@pipes)
 
       def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
-        ip = %Flowex.IP{struct: struct, requester: self()}
+        pid = self()
+        ip = %Flowex.IP{struct: struct, requester: pid}
         GenServer.cast(out_name, {in_name, ip})
         receive do
-          %Flowex.IP{} = ip -> ip.struct
+          %Flowex.IP{requester: ^pid} = ip -> ip.struct
           smth -> raise "Expected %Flowex.IP{}, received #{inspect smth}"
         end
       end

@@ -22,12 +22,13 @@ defmodule ExceptionsSpec do
     before do
       Process.sleep(1000)
       IO.inspect("Starting crash")
-      Pipeline.run(pipeline(), %Pipeline{data: :fail})
+      # Pipeline.run(pipeline(), %Pipeline{data: :fail})
+      Process.sleep(1000)
+      IO.inspect("End of crash")
     end
 
-    let! :out, do: Pipeline.run(pipeline(), %Pipeline{data: 2})
-
     it "adfas" do
+      out = Pipeline.run(pipeline(), %Pipeline{data: 2})
       IO.inspect(out)
     end
   end

@@ -60,7 +60,8 @@ defmodule ModulePipelineSpec do
       {:shared,
         pipeline1: ModulePipeline.start(opts()),
         pipeline2: ModulePipeline.start(opts()),
-        pipeline3: ModulePipeline.start(opts())
+        pipeline3: FunPipeline.start(opts()),
+        pipeline4: FunPipeline.start(opts())
       }
     end
 
@@ -68,7 +69,8 @@ defmodule ModulePipelineSpec do
       {:shared,
         output1: ModulePipeline.run(shared.pipeline1, %ModulePipeline{number: 2}),
         output2: ModulePipeline.run(shared.pipeline2, %ModulePipeline{number: 2}),
-        output3: ModulePipeline.run(shared.pipeline3, %ModulePipeline{number: 2})
+        output3: FunPipeline.run(shared.pipeline3, %FunPipeline{number: 2}),
+        output4: FunPipeline.run(shared.pipeline3, %FunPipeline{number: 2})
       }
     end
 
@@ -76,6 +78,7 @@ defmodule ModulePipelineSpec do
       expect(shared.output1.number).to eq(3)
       expect(shared.output2.number).to eq(3)
       expect(shared.output3.number).to eq(3)
+      expect(shared.output4.number).to eq(3)
     end
   end
 end
