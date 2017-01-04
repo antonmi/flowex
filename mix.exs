@@ -4,7 +4,7 @@ defmodule Flowex.Mixfile do
   def project do
     [app: :flowex,
      version: "0.1.0",
-     elixir: ">= 1.2.0",
+     elixir: ">= 1.3.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      preferred_cli_env: [espec: :test],
