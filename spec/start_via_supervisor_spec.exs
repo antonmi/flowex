@@ -3,7 +3,7 @@ defmodule StartViaSupervisorSpec do
 
   # Supervisor.count_children(pid)
 
-  it "affa " do
+  xit "affa " do
     import Supervisor.Spec
     id = String.to_atom("Flowex.Producer #{inspect make_ref()}")
     children = [worker(Flowex.Producer, [nil, [name: id]] , [id: id])]
@@ -21,7 +21,7 @@ defmodule StartViaSupervisorSpec do
     opts =  %{a: :a, b: :b, c: :c}
 
     w = worker(Flowex.Stage, [{FunPipeline, :add_one, opts, [id]}, [name: :add_one_name]], [id: {FunPipeline, :add_one, 1}])
-    {:ok, add_one} = Supervisor.start_child(sup, w)
+    {:ok, _add_one} = Supervisor.start_child(sup, w)
 
     # w = worker(Flowex.Stage, [{FunPipeline, :mult_by_two, opts, [:add_one_name]}, [name: :mult_by_two_name]], [id: {FunPipeline, :mult_by_two, 1}])
     # {:ok, mult_by_two} = Supervisor.start_child(sup, w)
@@ -30,7 +30,7 @@ defmodule StartViaSupervisorSpec do
     # {:ok, minus_three} = Supervisor.start_child(sup, w)
 
     w = worker(Flowex.Consumer, [[:add_one_name], [name: :consumer_name]])
-    {:ok, out_consumer} = Supervisor.start_child(sup, w)
+    {:ok, _out_consumer} = Supervisor.start_child(sup, w)
 
     Experimental.GenStage.demand(in_producer, :forward)
 

@@ -7,7 +7,7 @@ defmodule ExceptionsSpec do
     defstruct data: nil
     pipe :fun
 
-    def fun(struct, opts) do
+    def fun(struct, _opts) do
       if struct.data == :fail do
         raise "Fail"
       else
@@ -27,7 +27,7 @@ defmodule ExceptionsSpec do
       IO.inspect("End of crash")
     end
 
-    it "adfas" do
+    xit "adfas" do
       out = Pipeline.run(pipeline(), %Pipeline{data: 2})
       IO.inspect(out)
     end
