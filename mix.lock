@@ -1,3 +1,5 @@
-%{"espec": {:hex, :espec, "1.2.1", "faf0b54502688401097d8cb36da3f9ba75f894a39bccc65e5ae7bffb1256f03e", [:mix], [{:meck, "~> 0.8.4", [hex: :meck, optional: false]}]},
+%{"earmark": {:hex, :earmark, "1.0.3", "89bdbaf2aca8bbb5c97d8b3b55c5dd0cff517ecc78d417e87f1d0982e514557b", [:mix], []},
+  "espec": {:hex, :espec, "1.2.1", "faf0b54502688401097d8cb36da3f9ba75f894a39bccc65e5ae7bffb1256f03e", [:mix], [{:meck, "~> 0.8.4", [hex: :meck, optional: false]}]},
+  "ex_doc": {:hex, :ex_doc, "0.14.5", "c0433c8117e948404d93ca69411dd575ec6be39b47802e81ca8d91017a0cf83c", [:mix], [{:earmark, "~> 1.0", [hex: :earmark, optional: false]}]},
   "gen_stage": {:hex, :gen_stage, "0.10.0", "ce1eb93a3f9708f2e215f70b3d3c7f55dea4a4ed7e9615195e28d543c9086656", [:mix], []},
   "meck": {:hex, :meck, "0.8.4", "59ca1cd971372aa223138efcf9b29475bde299e1953046a0c727184790ab1520", [:make, :rebar], []}}
