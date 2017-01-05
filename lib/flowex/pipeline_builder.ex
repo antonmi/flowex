@@ -8,7 +8,7 @@ defmodule Flowex.PipelineBuilder do
     last_names = pipeline_module.pipes()
     |> Enum.reduce([producer_name], fn({atom, count}, prev_pids) ->
       (1..count)
-      |> Enum.map(fn(i) ->
+      |> Enum.map(fn(_i) ->
         case Atom.to_char_list(atom) do
           ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {atom, opts}, prev_pids)
           _ ->  init_function_pipe(sup_pid, {pipeline_module, atom, opts}, prev_pids)
@@ -25,7 +25,7 @@ defmodule Flowex.PipelineBuilder do
 
   def stop(sup_pid) do
     Supervisor.which_children(sup_pid)
-    |> Enum.each(fn({id, pid, :worker, [_]}) ->
+    |> Enum.each(fn({id, _pid, :worker, [_]}) ->
       Supervisor.terminate_child(sup_pid, id)
     end)
     Supervisor.stop(sup_pid)

@@ -5,7 +5,7 @@ defmodule Flowex.Supervisor do
     Supervisor.start_link(__MODULE__, pipeline_module)
   end
 
-  def init(pipeline_module) do
+  def init(_pipeline_module) do
     name = String.to_atom("Flowex.Producer_#{inspect make_ref()}")
     children = [
       worker(Flowex.Producer, [nil, [name: name]], id: name)
