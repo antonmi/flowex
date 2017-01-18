@@ -102,10 +102,16 @@ We also renamed the module to `FunPipeline` because we are going to create "Flow
 Let's start a pipeline:
 ```elixir
 opts = %{a: 1, b: 2, c: 3}
+
 pipeline = FunPipeline.start(opts)
+
+#returns
+%Flowex.Pipeline{in_name: :"Flowex.Producer_#Reference<0.0.7.504>",
+ module: FunPipeline, out_name: :"Flowex.Consumer_#Reference<0.0.7.521>",
+ sup_pid: #PID<0.136.0>}
 ```
 What happened:
-- Three GenStages were started - 1 for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
+- Three GenStages were started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
 - Runs ':producer' and ':consumer' GenStages for input and output;
 - All the components are placed under Supervisor.
 
@@ -121,12 +127,89 @@ The `start` function returns a `%Flowex.Pipeline{}` struct with the following fi
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
 
 ### Run the pipeline.
+There are two ways of running calculations:
+
 `FunPipeline.run/2` function receive a `%Flowex.Pipeline{}` struct as a first argument and must receive a `%FunPipeline{}` struct as a second one.
 The `run` function returns a %FunPipeline{} struct.
 
 ```elixir
-iex(5)> FunPipeline.run(pipeline, %FunPipeline{number: 2})
+FunPipeline.run(pipeline, %FunPipeline{number: 2})
+# returns
 %FunPipeline{a: 1, b: 2, c: 3, number: 3}
 ```
 
 As expected, pipeline returned `%FunPipeline{}` struct with `number: 3`. `a`, `b` and `c` were set from options.
+
+Another way is using `Flowex.Client` module which implements GenServer behavior.
+`Flowex.Client.start\1` function receives pipeline struct as an argument.
+Then you can use `run/2` function. See example below:
+```elixir
+client_pid = Flowex.Client.start(pipeline)
+
+Flowex.Client.run(client_pid, %FunPipeline{number: 2})
+# returns
+%FunPipeline{a: 1, b: 2, c: 3, number: 3}
+```
+
+### Bottlenecks
+```elixir
+defmodule FunPipeline do
+  use Flowex.Pipeline
+
+  pipe :add_one, 1
+  pipe :mult_by_two, 3
+  pipe :minus_three, 2
+
+  # ...
+end
+```
+
+
+### Module pipelines
+One can create reusable 'pipe' - module which implements init and call functions.
+```elixir
+defmodule ModulePipeline do
+  use Flowex.Pipeline
+
+  defstruct number: nil, a: nil, b: nil, c: nil
+
+  pipe AddOne, 1
+  pipe MultByTwo, 3
+  pipe MinusThree, 2
+end
+
+#pipes
+
+defmodule AddOne do
+  def init(opts) do
+    %{opts | a: :add_one}
+  end
+
+  def call(struct, opts) do
+    new_number = struct.number + 1
+    %{struct | number: new_number, a: opts.a}
+  end
+end
+
+defmodule MultByTwo do
+  def init(opts) do
+    %{opts | b: :mult_by_two}
+  end
+
+  def call(struct, opts) do
+    new_number = struct.number * 2
+    %{struct | number: new_number, b: opts.b}
+  end
+end
+
+defmodule MinusThree do
+  def init(opts) do
+    %{opts | c: :minus_three}
+  end
+
+  def call(struct, opts) do
+    new_number = struct.number - 3
+    %{struct | number: new_number, c: opts.c}
+  end
+end
+```
