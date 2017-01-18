@@ -13,9 +13,7 @@ Let's consider a simple program which receive a number as an input, then adds on
 ```elixir
 defmodule Functions do
   def add_one(number), do: number + 1
-
   def mult_by_two(number), do: number * 2
-
   def minus_three(number), do: number - 3
 end
 
@@ -81,26 +79,18 @@ Let's add a few lines at the beginning.
 defmodule FunPipeline do
   use Flowex.Pipeline
 
-  defstruct number: nil, a: nil, b: nil, c: nil
-
   pipe :add_one
   pipe :mult_by_two
   pipe :minus_three
+
+  defstruct number: nil, a: nil, b: nil, c: nil
 
   def add_one(struct, opts) do
     new_number = struct.number + 1
     %{struct | number: new_number, a: opts.a}
   end
 
-  def mult_by_two(struct, opts) do
-    new_number = struct.number * 2
-    %{struct | number: new_number, b: opts.b}
-  end
-
-  def minus_three(struct, opts) do
-    new_number = struct.number - 3
-    %{struct | number: new_number, c: opts.c}
-  end
+  # mult_by_two and minus_three definitions skipped
 end
 ```
 We also renamed the module to `FunPipeline` because we are going to create "Flowex pipeline".
@@ -120,7 +110,7 @@ What happened:
 - All the components are placed under Supervisor.
 
 The next picture shows what the 'pipeline' is.
-![alt text](figures/pipeline.png "FunPipeline")
+![alt text](figures/fun_pipeline.png "FunPipeline")
 
 The `start` function returns a `%Flowex.Pipeline{}` struct with the following fields:
 - module - the name of the module

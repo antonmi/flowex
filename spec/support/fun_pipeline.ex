@@ -1,11 +1,11 @@
 defmodule FunPipeline do
   use Flowex.Pipeline
 
-  defstruct number: nil, a: nil, b: nil, c: nil
-
   pipe :add_one
   pipe :mult_by_two
   pipe :minus_three
+
+  defstruct number: nil, a: nil, b: nil, c: nil
 
   def add_one(struct, opts) do
     new_number = struct.number + 1
