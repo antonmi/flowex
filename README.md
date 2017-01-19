@@ -1,4 +1,6 @@
 # Flowex
+[![Build Status](https://travis-ci.org/antonmi/flowex.svg?branch=master)](https://travis-ci.org/antonmi/flowex)
+[![Hex.pm](https://img.shields.io/hexpm/v/flowex.svg?style=flat-square)](https://hex.pm/packages/flowex)
 
 ## Flow-Based Programming with Elixir GenStage.
 ### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming paradigm](https://en.wikipedia.org/wiki/Flow-based_programming).
