@@ -32,7 +32,7 @@ defmodule StartViaSupervisorSpec do
     w = worker(Flowex.Consumer, [[:add_one_name], [name: :consumer_name]])
     {:ok, _out_consumer} = Supervisor.start_child(sup, w)
 
-    Experimental.GenStage.demand(in_producer, :forward)
+    GenStage.demand(in_producer, :forward)
 
 
     pipeline = %Flowex.Pipeline{module: __MODULE__, in_name: id, out_name: :consumer_name, sup_pid: sup}

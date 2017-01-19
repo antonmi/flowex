@@ -1,8 +1,8 @@
 defmodule Flowex.Consumer do
-  use Experimental.GenStage
+  use GenStage
 
   def start_link(subscribe_to, opts \\ []) do
-    Experimental.GenStage.start_link(__MODULE__, subscribe_to, opts)
+    GenStage.start_link(__MODULE__, subscribe_to, opts)
   end
 
   def init(subscribe_to \\ []) do
@@ -16,7 +16,7 @@ defmodule Flowex.Consumer do
   end
 
   def handle_cast({in_name, ip}, nil) do
-    Experimental.GenStage.cast(in_name, ip)
+    GenStage.cast(in_name, ip)
     {:noreply, [], nil}
   end
 end

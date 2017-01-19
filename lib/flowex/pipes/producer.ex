@@ -1,8 +1,8 @@
 defmodule Flowex.Producer do
-  use Experimental.GenStage
+  use GenStage
 
   def start_link(nil, opts \\ []) do
-    Experimental.GenStage.start_link(__MODULE__, nil, opts)
+    GenStage.start_link(__MODULE__, nil, opts)
   end
 
   def init(_), do: {:producer, []}
