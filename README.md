@@ -3,7 +3,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/flowex.svg?style=flat-square)](https://hex.pm/packages/flowex)
 
 ## Flow-Based Programming with Elixir GenStage.
-### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming paradigm](https://en.wikipedia.org/wiki/Flow-based_programming).
+#### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming paradigm](https://en.wikipedia.org/wiki/Flow-based_programming).
 I would say Flowex is a mix of FBP and so called [Railway Oriented Programming (ROP)](http://fsharpforfunandprofit.com/rop/) approach.
 
 
@@ -152,8 +152,26 @@ Flowex.Client.run(client_pid, %FunPipeline{number: 2})
 # returns
 %FunPipeline{a: 1, b: 2, c: 3, number: 3}
 ```
+### How it works
+The following figure demonstrates the way data follows:
+![alt text](figures/pipeline_with_client.png "How it works")
+The things happen when you call `Flowex.Client.run`:
+- `self` process makes synchronous call to the client gen_server with `%FunPipeline{number: 2}` struct
+- client makes synchronous call 'FunPipeline.run(pipeline, %FunPipeline{number: 2})'
+- the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another
+- when consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
+
+### Synchronous and asynchronous calls. Parallel execution.
+Note, that `run` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
+![alt text](figures/pipeline_sync_async.png "Sync and async")
+In order to send large number of IP's and process them in parallel one can use several client connected to the pipeline:
+![alt text](figures/many_clients.png "Group of clients")
 
 ### Bottlenecks
+Each component of pipeline takes a some to finish IP processing. One component do simple work, another can process data for a long time.
+So if several clients continuously push data they will stack before the slowest component. And data processing speed will be limited by that component.
+
+Flowex has a solution! One can define a number of execution processes for each component.
 ```elixir
 defmodule FunPipeline do
   use Flowex.Pipeline
@@ -165,7 +183,8 @@ defmodule FunPipeline do
   # ...
 end
 ```
-
+And the pipeline will look like on the figure below:
+![alt text](figures/complex_pipeline.png "Group of clients")
 
 ### Module pipelines
 One can create reusable 'pipe' - module which implements init and call functions.
