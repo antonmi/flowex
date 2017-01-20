@@ -3,14 +3,14 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/flowex.svg?style=flat-square)](https://hex.pm/packages/flowex)
 
 ## Flow-Based Programming with Elixir GenStage.
-#### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming](https://en.wikipedia.org/wiki/Flow-based_programming) paradigm.
-I would say Flowex is a mix of FBP and so called [Railway Oriented Programming (ROP)](http://fsharpforfunandprofit.com/rop/) approach.
+#### Flowex is a set of abstractions build on top Elixir GenStage which allows writing program with [Flow-Based Programming](https://en.wikipedia.org/wiki/Flow-based_programming) paradigm.
+I would say Flowex is a mix of FBP and so-called [Railway Oriented Programming (ROP)](http://fsharpforfunandprofit.com/rop/) approach.
 
 Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 #### Dedicated to my lovely girlfriend Chryścina.
 
-### Simple example to get the idea.
-Let's consider a simple program which receive a number as an input, then adds one, then multiplies result by two and finally subtracts 3.
+### A simple example to get the idea.
+Let's consider a simple program which receives a number as an input, then adds one, then multiplies the result by two and finally subtracts 3.
 
 ```elixir
 defmodule Functions do
@@ -31,16 +31,16 @@ end
 So the program is a pipeline of functions with the same interface. The functions are very simple in the example.
 
 In the real world they can be something like `validate_http_request`, `get_user_from_db`, `update_db_from_request` and `render_response`.
-Furthermore each of the function can potentially fail. But for getting the idea let's stick the simplest example.
+Furthermore, each of the function can potentially fail. But for getting the idea let's stick the simplest example.
 
 FBP defines applications as networks of "black box" processes, which exchange data across predefined connections by message passing.
 
-To satisfy the FBP approach we need to place each of the function into separate process. So the number will be passed from 'add_one' process to 'mult_by_two' and then 'minus_three' process which returns the final result.
+To satisfy the FBP approach we need to place each of the function into a separate process. So the number will be passed from 'add_one' process to 'mult_by_two' and then 'minus_three' process which returns the final result.
 
 That, in short, is the idea of Flowex!
 
 ### More complex example for understanding interface
-Let's define more strict interface for our function. Flowex uses the same approach as [Plug](https://github.com/elixir-lang/plug).
+Let's define a more strict interface for our function. Flowex uses the same approach as [Plug](https://github.com/elixir-lang/plug).
 So each of the function must receive a predefined struct as a first argument and return the struct of the same type:
 
 ```elixir
@@ -49,7 +49,7 @@ def add_one(struct, opts) do
   %{struct | number: new_number, a: opts.a}
 end
 ```
-The function receives a structure with `number` and `a` fields and return modified structure or the same type.
+The function receives a structure with `number` and `a` fields and returns modified structure or the same type.
 The second argument is a set of options and will be described later.
 Let's rewrite the whole `Functions` module in the following way:
 ```elixir
@@ -72,7 +72,7 @@ defmodule Functions do
   end
 end
 ```
-Code is more complex but more solid. The module defines three functions with the same interface.
+The code is more complex but more solid. The module defines three functions with the same interface.
 We also defined as struct `%Functions{}` which defines a data-structure being passed to the functions.
 
 ### Flowex magic begins!
@@ -96,7 +96,7 @@ defmodule FunPipeline do
 end
 ```
 We also renamed the module to `FunPipeline` because we are going to create "Flowex pipeline".
-`Flowex.Pipeline` extent our module, so we have:
+`Flowex.Pipeline` extend our module, so we have:
 - `pipe` macros to define which function evaluation should be placed into separate GenStage;
 - `start` and `stop` functions to create and destroy pipelines;
 - `run` function to run pipeline computations.
@@ -114,7 +114,7 @@ pipeline = FunPipeline.start(opts)
 ```
 What happened:
 - Three GenStages were started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
-- Runs ':producer' and ':consumer' GenStages for input and output;
+- Runs 'producer' and 'consumer' GenStages for input and output;
 - All the components are placed under Supervisor.
 
 The next picture shows what the 'pipeline' is.
@@ -122,8 +122,8 @@ The next picture shows what the 'pipeline' is.
 
 The `start` function returns a `%Flowex.Pipeline{}` struct with the following fields:
 - module - the name of the module
-- in_name - uniq name of 'producer';
-- out_name - uniq name of 'consumer';
+- in_name - unique name of 'producer';
+- out_name - unique name of 'consumer';
 - sup_pid - pid of the pipeline supervisor
 
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
@@ -143,7 +143,7 @@ FunPipeline.run(pipeline, %FunPipeline{number: 2})
 As expected, pipeline returned `%FunPipeline{}` struct with `number: 3`. `a`, `b` and `c` were set from options.
 
 Another way is using `Flowex.Client` module which implements GenServer behavior.
-`Flowex.Client.start\1` function receives pipeline struct as an argument.
+The `Flowex.Client.start\1` function receives pipeline struct as an argument.
 Then you can use `run/2` function. See example below:
 ```elixir
 client_pid = Flowex.Client.start(pipeline)
@@ -157,18 +157,18 @@ The following figure demonstrates the way data follows:
 ![alt text](figures/pipeline_with_client.png "How it works")
 The things happen when you call `Flowex.Client.run`:
 - `self` process makes synchronous call to the client gen_server with `%FunPipeline{number: 2}` struct
-- client makes synchronous call 'FunPipeline.run(pipeline, %FunPipeline{number: 2})'
+- the client makes synchronous call 'FunPipeline.run(pipeline, %FunPipeline{number: 2})'
 - the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another
-- when consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
+- when the consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
 
 ### Synchronous and asynchronous calls. Parallel execution.
 Note, that `run` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
 ![alt text](figures/pipeline_sync_async.png "Sync and async")
-In order to send large number of IP's and process them in parallel one can use several client connected to the pipeline:
+In order to send a large number of IP's and process them in parallel one can use several clients connected to the pipeline:
 ![alt text](figures/many_clients.png "Group of clients")
 
 ### Bottlenecks
-Each component of pipeline takes a some to finish IP processing. One component do simple work, another can process data for a long time.
+Each component of pipeline takes a some to finish IP processing. One component does simple work, another can process data for a long time.
 So if several clients continuously push data they will stack before the slowest component. And data processing speed will be limited by that component.
 
 Flowex has a solution! One can define a number of execution processes for each component.
