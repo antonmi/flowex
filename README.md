@@ -3,11 +3,11 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/flowex.svg?style=flat-square)](https://hex.pm/packages/flowex)
 
 ## Flow-Based Programming with Elixir GenStage.
-#### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming paradigm](https://en.wikipedia.org/wiki/Flow-based_programming).
+#### Flowex is a set of abstractions build on top Exlixir GenStage which allows to write program with [Flow-Based Programming](https://en.wikipedia.org/wiki/Flow-based_programming) paradigm.
 I would say Flowex is a mix of FBP and so called [Railway Oriented Programming (ROP)](http://fsharpforfunandprofit.com/rop/) approach.
 
-
 Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
+#### Dedicated to my lovely girlfriend Chryścina.
 
 ### Simple example to get the idea.
 Let's consider a simple program which receive a number as an input, then adds one, then multiplies result by two and finally subtracts 3.
