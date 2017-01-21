@@ -15,6 +15,8 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Flowex magic!](#flowex-magic!)
 - [Run the pipeline](#run-the-pipeline)
 - [How it works](#how-it-works)
+- [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
+- [Bottlenecks](#bottlenecks)
 - [Module pipelines](#module-pipelines)
 - [Contributing](#contributing)
 
@@ -170,13 +172,13 @@ The things happen when you call `Flowex.Client.run`:
 - the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another
 - when the consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
 
-### Synchronous and asynchronous calls. Parallel execution.
+## Synchronous and asynchronous calls
 Note, that `run` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
 ![alt text](figures/pipeline_sync_async.png "Sync and async")
 In order to send a large number of IP's and process them in parallel one can use several clients connected to the pipeline:
 ![alt text](figures/many_clients.png "Group of clients")
 
-### Bottlenecks
+## Bottlenecks
 Each component of pipeline takes a some to finish IP processing. One component does simple work, another can process data for a long time.
 So if several clients continuously push data they will stack before the slowest component. And data processing speed will be limited by that component.
 
