@@ -157,7 +157,7 @@ Another way is using `Flowex.Client` module which implements GenServer behavior.
 The `Flowex.Client.start\1` function receives pipeline struct as an argument.
 Then you can use `run/2` function. See example below:
 ```elixir
-client_pid = Flowex.Client.start(pipeline)
+{:ok, client_pid} = Flowex.Client.start(pipeline)
 
 Flowex.Client.run(client_pid, %FunPipeline{number: 2})
 # returns
