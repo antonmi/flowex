@@ -9,7 +9,16 @@ I would say Flowex is a mix of FBP and so-called [Railway Oriented Programming (
 Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 #### Dedicated to my lovely girlfriend Chryścina.
 
-### A simple example to get the idea.
+## Contents
+- [A simple example to get the idea](#a-simple-example-to-get-the-idea)
+- [More complex example for understanding interface](#more-complex-example-for-understanding-interface)
+- [Flowex magic!](#flowex-magic!)
+- [Run the pipeline](#run-the-pipeline)
+- [How it works](#how-it-works)
+- [Module pipelines](#module-pipelines)
+- [Contributing](#contributing)
+
+## A simple example to get the idea
 Let's consider a simple program which receives a number as an input, then adds one, then multiplies the result by two and finally subtracts 3.
 
 ```elixir
@@ -39,7 +48,7 @@ To satisfy the FBP approach we need to place each of the function into a separat
 
 That, in short, is the idea of Flowex!
 
-### More complex example for understanding interface
+## More complex example for understanding interface
 Let's define a more strict interface for our function. Flowex uses the same approach as [Plug](https://github.com/elixir-lang/plug).
 So each of the function must receive a predefined struct as a first argument and return the struct of the same type:
 
@@ -75,7 +84,7 @@ end
 The code is more complex but more solid. The module defines three functions with the same interface.
 We also defined as struct `%Functions{}` which defines a data-structure being passed to the functions.
 
-### Flowex magic begins!
+## Flowex magic!
 Let's add a few lines at the beginning.
 ```elixir
 defmodule FunPipeline do
@@ -128,7 +137,7 @@ The `start` function returns a `%Flowex.Pipeline{}` struct with the following fi
 
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
 
-### Run the pipeline.
+## Run the pipeline
 There are two ways of running calculations:
 
 `FunPipeline.run/2` function receive a `%Flowex.Pipeline{}` struct as a first argument and must receive a `%FunPipeline{}` struct as a second one.
@@ -152,7 +161,7 @@ Flowex.Client.run(client_pid, %FunPipeline{number: 2})
 # returns
 %FunPipeline{a: 1, b: 2, c: 3, number: 3}
 ```
-### How it works
+## How it works
 The following figure demonstrates the way data follows:
 ![alt text](figures/pipeline_with_client.png "How it works")
 The things happen when you call `Flowex.Client.run`:
@@ -186,7 +195,7 @@ end
 And the pipeline will look like on the figure below:
 ![alt text](figures/complex_pipeline.png "Group of clients")
 
-### Module pipelines
+## Module pipelines
 One can create reusable 'pipe' - module which implements init and call functions.
 ```elixir
 defmodule ModulePipeline do
@@ -233,4 +242,17 @@ defmodule MinusThree do
     %{struct | number: new_number, c: opts.c}
   end
 end
+```
+Of course, one can combine module and functional 'pipes'!
+
+## Contributing
+#### Contributions are welcome and appreciated!
+
+Request a new feature by creating an issue.
+
+Create a pull request with new features or fixes.
+
+Flowex is tested using ESpec. So run:
+```sh
+mix espec
 ```
