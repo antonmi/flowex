@@ -10,6 +10,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 #### Dedicated to my lovely girlfriend Chryścina.
 
 ## Contents
+- [Installation](#installation)
 - [A simple example to get the idea](#a-simple-example-to-get-the-idea)
 - [More complex example for understanding interface](#more-complex-example-for-understanding-interface)
 - [Flowex magic!](#flowex-magic!)
@@ -19,6 +20,9 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Bottlenecks](#bottlenecks)
 - [Module pipelines](#module-pipelines)
 - [Contributing](#contributing)
+
+## Installation
+Just add `flowex` as dependency to the `mix.exs` file.
 
 ## A simple example to get the idea
 Let's consider a simple program which receives a number as an input, then adds one, then multiplies the result by two and finally subtracts 3.
