@@ -90,6 +90,19 @@ end
 The code is more complex but more solid. The module defines three functions with the same interface.
 We also defined as struct `%Functions{}` which defines a data-structure being passed to the functions.
 
+The main module may look like:
+```elixir
+defmodule MainModule do
+  def run(number) do
+    opts = %{a: 1, b: 2, c: 3}
+    %Functions{number: number}
+    |> Functions.add_one(opts)
+    |> Functions.mult_by_two(opts)
+    |> Functions.minus_three(opts)
+  end
+end
+```
+
 ## Flowex magic!
 Let's add a few lines at the beginning.
 ```elixir
