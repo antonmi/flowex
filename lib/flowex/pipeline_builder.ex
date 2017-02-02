@@ -16,7 +16,7 @@ defmodule Flowex.PipelineBuilder do
       end)
     end)
 
-    consumer_name = String.to_atom("Flowex.Consumer_#{inspect make_ref()}")
+    consumer_name = String.to_atom("Flowex.Consumer_#{inspect pipeline_module}_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Consumer, [last_names, [name: consumer_name]], [id: consumer_name])
     {:ok, _out_consumer_pid} = Supervisor.start_child(sup_pid, worker_spec)
 
@@ -32,7 +32,7 @@ defmodule Flowex.PipelineBuilder do
   end
 
   defp init_function_pipe(sup_pid, {pipeline_module, function, opts}, prev_pids) do
-    name = String.to_atom("#{__MODULE__}.#{function}_#{inspect make_ref()}")
+    name = String.to_atom("Flowex_#{pipeline_module}.#{function}_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Stage,
                          [{pipeline_module, function, opts, prev_pids}, [name: name]],
                          [id: name])
@@ -42,7 +42,7 @@ defmodule Flowex.PipelineBuilder do
 
   defp init_module_pipe(sup_pid, {module, opts}, prev_pids) do
     opts = module.init(opts)
-    name = String.to_atom("#{module}.call_#{inspect make_ref()}")
+    name = String.to_atom("Flowex_#{module}.call_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Stage,
                          [{module, :call, opts, prev_pids}, [name: name]],
                          [id: name])
