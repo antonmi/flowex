@@ -19,19 +19,17 @@ defmodule ExceptionsSpec do
   let! :pipeline, do: Pipeline.start
 
   context "with crash" do
-    before do
-      Process.sleep(1000)
-      IO.inspect("Starting crash")
-      # Pipeline.run(pipeline(), %Pipeline{data: :fail})
-      Process.sleep(1000)
-      IO.inspect("End of crash")
+    def run_pipeline(struct) do
+      Pipeline.run(ExceptionsSpec.pipeline(), struct)
     end
 
-    xit "adfas" do
-      out = Pipeline.run(pipeline(), %Pipeline{data: 2})
-      IO.inspect(out)
+    let :func do
+      fn -> run_pipeline(%Pipeline{data: :fail}) end
+    end
+
+    it "raises a Flowex.PipelineError but still works" do
+      expect(func()).to raise_exception(Flowex.PipelineError)
+      expect(run_pipeline(%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
     end
   end
-
-
 end

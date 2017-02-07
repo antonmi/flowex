@@ -28,13 +28,21 @@ defmodule Flowex.Pipeline do
     quote do
       def pipes, do: Enum.reverse(@pipes)
 
-      def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
+      def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
+        out_pid = Process.whereis(out_name)
+        Process.link(out_pid)
+        Process.flag(:trap_exit, true)
         ip = %Flowex.IP{struct: struct, requester: pid}
         GenServer.cast(out_name, {in_name, ip})
         receive do
-          %Flowex.IP{requester: ^pid} = ip -> ip.struct
-          smth -> raise "Expected %Flowex.IP{}, received #{inspect smth}"
+          %Flowex.IP{requester: ^pid} = ip ->
+            ip.struct
+          {:EXIT, ^out_pid, reason} ->
+            raise Flowex.PipelineError, pipeline: pipeline, message: reason
+          smth ->
+            reason = "Expected %Flowex.IP{}, received #{inspect smth}"
+            raise Flowex.PipelineError, pipeline: pipeline, message: reason
         end
       end
     end
