@@ -29,6 +29,7 @@ defmodule ExceptionsSpec do
 
     it "raises a Flowex.PipelineError but still works" do
       expect(func()).to raise_exception(Flowex.PipelineError)
+      Process.sleep(100)
       expect(run_pipeline(%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
     end
   end
