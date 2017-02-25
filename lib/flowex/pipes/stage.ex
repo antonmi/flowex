@@ -10,26 +10,30 @@ defmodule Flowex.Stage do
     {:producer_consumer, {type, module, function, opts}, subscribe_to: subscribe_to}
   end
 
-  def handle_events([ip], _from, {type, module, function, opts}) do
+  def handle_events([ip], _from, {:pipe, module, function, opts}) do
     if ip.error do
-      if type == :error_pipe do
-        new_ip = %{ip | struct: apply(module, function, [ip.error, ip.struct, opts])}
-        {:noreply, [new_ip], {type, module, function, opts}}
-      else
-        {:noreply, [ip], {type, module, function, opts}}
-      end
+      {:noreply, [ip], {:pipe, module, function, opts}}
     else
-      new_ip = try do
-        if type == :pipe do
-          %{ip | struct: apply(module, function, [ip.struct, opts])}
-        else
-          ip
-        end
-      rescue
-        error ->
-          %{ip | error: %Flowex.StageError{message: error.message, pipe: {module, function, opts}, struct: ip.struct}}
-      end
-      {:noreply, [new_ip], {type, module, function, opts}}
+      new_ip = try_apply(ip, {module, function, opts})
+      {:noreply, [new_ip], {:pipe, module, function, opts}}
+    end
+  end
+
+  def handle_events([ip], _from, {:error_pipe, module, function, opts}) do
+    if ip.error do
+      new_ip = %{ip | struct: apply(module, function, [ip.error, ip.struct, opts])}
+      {:noreply, [new_ip], {:error_pipe, module, function, opts}}
+    else
+      {:noreply, [ip], {:error_pipe, module, function, opts}}
+    end
+  end
+
+  defp try_apply(ip, {module, function, opts}) do
+    try do
+      %{ip | struct: apply(module, function, [ip.struct, opts])}
+    rescue
+      error ->
+        %{ip | error: %Flowex.StageError{message: error.message, pipe: {module, function, opts}, struct: ip.struct}}
     end
   end
 end

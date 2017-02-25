@@ -24,7 +24,7 @@ defmodule ExceptionsSpec do
     def second(struct, _opts), do: struct
     def at_the_end(struct, _opts), do: struct
 
-    def if_error(error, struct, _opts) do
+    def if_error(error, _struct, _opts) do
       raise error
     end
   end
