@@ -3,7 +3,13 @@ defmodule Flowex.Pipeline do
 
   defmacro pipe(atom, count \\ 1) do
     quote do
-      @pipes unquote({atom, count})
+      @pipes {unquote(atom), unquote(count), :pipe}
+    end
+  end
+
+  defmacro error_pipe(atom, count \\ 1) do
+    quote do
+      @error_pipe {unquote(atom), unquote(count), :error_pipe}
     end
   end
 
@@ -12,6 +18,9 @@ defmodule Flowex.Pipeline do
       import Flowex.Pipeline
 
       Module.register_attribute __MODULE__, :pipes, accumulate: true
+      Module.register_attribute __MODULE__, :error_pipe, accumulate: false
+      @error_pipe {:handle_error, 1, :error_pipe}
+
       @before_compile Flowex.Pipeline
 
       def start(opts \\ %{}) do
@@ -21,12 +30,17 @@ defmodule Flowex.Pipeline do
       def stop(%Flowex.Pipeline{sup_pid: sup_pid}) do
         Flowex.PipelineBuilder.stop(sup_pid)
       end
+
+      def handle_error(error, _struct, _opts) do
+        raise error
+      end
     end
   end
 
   defmacro __before_compile__(_env) do
     quote do
       def pipes, do: Enum.reverse(@pipes)
+      def error_pipe, do: @error_pipe
 
       def call(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
@@ -51,6 +65,7 @@ defmodule Flowex.Pipeline do
 
       defp link_to_consumer(out_name) do
         out_pid = Process.whereis(out_name)
+
         Process.link(out_pid)
         Process.flag(:trap_exit, true)
         out_pid

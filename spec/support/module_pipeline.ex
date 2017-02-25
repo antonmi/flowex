@@ -6,6 +6,7 @@ defmodule ModulePipeline do
   pipe AddOne, 1
   pipe MultByTwo, 3
   pipe MinusThree, 2
+  error_pipe IfError, 3
 end
 
 #pipes
@@ -39,5 +40,16 @@ defmodule MinusThree do
   def call(struct, opts) do
     new_number = struct.number - 3
     %{struct | number: new_number, c: opts.c}
+  end
+end
+
+
+defmodule IfError do
+  def init(opts) do
+    %{opts | c: :minus_three}
+  end
+
+  def call(error, struct, _opts) do
+    %{struct | number: error}
   end
 end
