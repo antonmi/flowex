@@ -127,7 +127,8 @@ We also renamed the module to `FunPipeline` because we are going to create "Flow
 `Flowex.Pipeline` extend our module, so we have:
 - `pipe` macros to define which function evaluation should be placed into separate GenStage;
 - `start` and `stop` functions to create and destroy pipelines;
-- `run` function to run pipeline computations.
+- `call` function to run pipeline computations synchronously.
+- `cast` function to run pipeline computations asynchronously.
 
 Let's start a pipeline:
 ```elixir
@@ -157,41 +158,59 @@ The `start` function returns a `%Flowex.Pipeline{}` struct with the following fi
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
 
 ## Run the pipeline
-There are two ways of running calculations:
+One can run calculations in pipeline synchronously and asynchronously:
+- `call` function to run pipeline computations synchronously.
+- `cast` function to run pipeline computations asynchronously.
 
-`FunPipeline.run/2` function receive a `%Flowex.Pipeline{}` struct as a first argument and must receive a `%FunPipeline{}` struct as a second one.
-The `run` function returns a %FunPipeline{} struct.
+`FunPipeline.call/2` function receive a `%Flowex.Pipeline{}` struct as a first argument and must receive a `%FunPipeline{}` struct as a second one.
+The `call` function returns a %FunPipeline{} struct.
 
 ```elixir
-FunPipeline.run(pipeline, %FunPipeline{number: 2})
+FunPipeline.call(pipeline, %FunPipeline{number: 2})
 # returns
 %FunPipeline{a: 1, b: 2, c: 3, number: 3}
 ```
-
 As expected, pipeline returned `%FunPipeline{}` struct with `number: 3`. `a`, `b` and `c` were set from options.
 
+If you don't care about the result, you should use `cast/2` function to run and forget.
+```elixir
+FunPipeline.cast(pipeline, %FunPipeline{number: 2})
+# returns
+:ok
+```
+
+## Run via client
 Another way is using `Flowex.Client` module which implements GenServer behavior.
 The `Flowex.Client.start\1` function receives pipeline struct as an argument.
-Then you can use `run/2` function. See example below:
+Then you can use `call/2` function or `cast/2`. See example below:
 ```elixir
 {:ok, client_pid} = Flowex.Client.start(pipeline)
 
-Flowex.Client.run(client_pid, %FunPipeline{number: 2})
+Flowex.Client.call(client_pid, %FunPipeline{number: 2})
 # returns
 %FunPipeline{a: 1, b: 2, c: 3, number: 3}
+
+#or
+Flowex.Client.cast(client_pid, %FunPipeline{number: 2})
+# returns
+:ok
 ```
 ## How it works
 The following figure demonstrates the way data follows:
 ![alt text](figures/pipeline_with_client.png "How it works")
-The things happen when you call `Flowex.Client.run`:
+The things happen when you call `Flowex.Client.call`:
 - `self` process makes synchronous call to the client gen_server with `%FunPipeline{number: 2}` struct
-- the client makes synchronous call 'FunPipeline.run(pipeline, %FunPipeline{number: 2})'
+- the client makes synchronous call 'FunPipeline.call(pipeline, %FunPipeline{number: 2})'
 - the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another
 - when the consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
 
 ## Synchronous and asynchronous calls
-Note, that `run` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
+Note, that `call` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
 ![alt text](figures/pipeline_sync_async.png "Sync and async")
+One might think that there is no way to effectively use the pipeline via `call/2` method.
+
+That's not true!
+
 In order to send a large number of IP's and process them in parallel one can use several clients connected to the pipeline:
 ![alt text](figures/many_clients.png "Group of clients")
 

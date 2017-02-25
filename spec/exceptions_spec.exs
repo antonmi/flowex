@@ -1,5 +1,5 @@
 defmodule ExceptionsSpec do
-  use ESpec
+  use ESpec, async: true
 
   defmodule Pipeline do
     use Flowex.Pipeline
@@ -20,7 +20,7 @@ defmodule ExceptionsSpec do
 
   context "with crash" do
     def run_pipeline(struct) do
-      Pipeline.run(ExceptionsSpec.pipeline(), struct)
+      Pipeline.call(ExceptionsSpec.pipeline(), struct)
     end
 
     let :func do

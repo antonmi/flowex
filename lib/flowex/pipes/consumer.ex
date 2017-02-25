@@ -11,7 +11,9 @@ defmodule Flowex.Consumer do
   end
 
   def handle_events([ip], _from, nil) do
-    send(ip.requester, ip)
+    if is_pid(ip.requester) do
+      send(ip.requester, ip)
+    end
     {:noreply, [], nil}
   end
 

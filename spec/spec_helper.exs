@@ -9,4 +9,5 @@ ESpec.configure fn(config) ->
 end
 
 Code.require_file("spec/support/fun_pipeline.ex")
+Code.require_file("spec/support/fun_pipeline_cast.ex")
 Code.require_file("spec/support/module_pipeline.ex")

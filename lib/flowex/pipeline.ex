@@ -28,11 +28,9 @@ defmodule Flowex.Pipeline do
     quote do
       def pipes, do: Enum.reverse(@pipes)
 
-      def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
+      def call(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
-        out_pid = Process.whereis(out_name)
-        Process.link(out_pid)
-        Process.flag(:trap_exit, true)
+        out_pid = link_to_consumer(out_name)
         ip = %Flowex.IP{struct: struct, requester: pid}
         GenServer.cast(out_name, {in_name, ip})
         receive do
@@ -44,6 +42,18 @@ defmodule Flowex.Pipeline do
             reason = "Expected %Flowex.IP{}, received #{inspect smth}"
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
         end
+      end
+
+      def cast(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
+        ip = %Flowex.IP{struct: struct, requester: false}
+        GenServer.cast(out_name, {in_name, ip})
+      end
+
+      defp link_to_consumer(out_name) do
+        out_pid = Process.whereis(out_name)
+        Process.link(out_pid)
+        Process.flag(:trap_exit, true)
+        out_pid
       end
     end
   end

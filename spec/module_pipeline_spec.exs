@@ -28,7 +28,7 @@ defmodule ModulePipelineSpec do
 
   describe ".run" do
     let :pipeline, do: ModulePipeline.start(opts())
-    let :output, do: ModulePipeline.run(pipeline(), %ModulePipeline{number: 2})
+    let :output, do: ModulePipeline.call(pipeline(), %ModulePipeline{number: 2})
 
     it do: assert output().number == 3
 
@@ -43,7 +43,7 @@ defmodule ModulePipelineSpec do
 
       before do
         numbers = Enum.map(attempts(), fn(_) ->
-          ModulePipeline.run(pipeline(), %ModulePipeline{number: 2}).number
+          ModulePipeline.call(pipeline(), %ModulePipeline{number: 2}).number
         end)
         {:ok, numbers: numbers}
       end
@@ -67,10 +67,10 @@ defmodule ModulePipelineSpec do
 
     before do
       {:shared,
-        output1: ModulePipeline.run(shared.pipeline1, %ModulePipeline{number: 2}),
-        output2: ModulePipeline.run(shared.pipeline2, %ModulePipeline{number: 2}),
-        output3: FunPipeline.run(shared.pipeline3, %FunPipeline{number: 2}),
-        output4: FunPipeline.run(shared.pipeline3, %FunPipeline{number: 2})
+        output1: ModulePipeline.call(shared.pipeline1, %ModulePipeline{number: 2}),
+        output2: ModulePipeline.call(shared.pipeline2, %ModulePipeline{number: 2}),
+        output3: FunPipeline.call(shared.pipeline3, %FunPipeline{number: 2}),
+        output4: FunPipeline.call(shared.pipeline3, %FunPipeline{number: 2})
       }
     end
 
