@@ -1,4 +1,4 @@
-defmodule ExceptionsSpec do
+defmodule UnhandledErrorSpec do
   use ESpec, async: true
 
   defmodule Pipeline do
@@ -15,7 +15,7 @@ defmodule ExceptionsSpec do
 
     def fun(struct, _opts) do
       if struct.data == :fail do
-        raise "Fail"
+        Process.exit(self(), :kill)
       else
         struct
       end
@@ -29,11 +29,10 @@ defmodule ExceptionsSpec do
     end
   end
 
-  let! :pipeline, do: Pipeline.start
-
   context "with crash" do
     def run_pipeline(struct) do
-      Pipeline.call(ExceptionsSpec.pipeline(), struct)
+      pipeline = Pipeline.start
+      Pipeline.call(pipeline, struct)
     end
 
     let :func do
@@ -43,7 +42,6 @@ defmodule ExceptionsSpec do
     it "raises a Flowex.PipelineError but still works" do
       expect(func()).to raise_exception(Flowex.PipelineError)
       Process.sleep(100)
-
       expect(run_pipeline(%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
     end
   end
