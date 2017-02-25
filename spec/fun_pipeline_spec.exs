@@ -28,7 +28,7 @@ defmodule FunPipelineSpec do
     end
   end
 
-  describe ".run" do
+  describe ".call" do
     let :opts, do: %{a: :a, b: :b, c: :c}
     let :pipeline, do: FunPipeline.start(opts())
     let :output, do: FunPipeline.call(pipeline(), %FunPipeline{number: 2})

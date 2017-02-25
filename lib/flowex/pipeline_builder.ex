@@ -5,13 +5,13 @@ defmodule Flowex.PipelineBuilder do
     {:ok, sup_pid} = Flowex.Supervisor.start_link(pipeline_module)
     [{producer_name, _in_producer, :worker, [Flowex.Producer]}] = Supervisor.which_children(sup_pid)
 
-    last_names = pipeline_module.pipes()
-    |> Enum.reduce([producer_name], fn({atom, count}, prev_pids) ->
+    last_names = (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
+    |> Enum.reduce([producer_name], fn({atom, count, type}, prev_pids) ->
       (1..count)
       |> Enum.map(fn(_i) ->
         case Atom.to_char_list(atom) do
-          ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {atom, opts}, prev_pids)
-          _ ->  init_function_pipe(sup_pid, {pipeline_module, atom, opts}, prev_pids)
+          ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {type, atom, opts}, prev_pids)
+          _ ->  init_function_pipe(sup_pid, {type, pipeline_module, atom, opts}, prev_pids)
         end
       end)
     end)
@@ -31,20 +31,20 @@ defmodule Flowex.PipelineBuilder do
     Supervisor.stop(sup_pid)
   end
 
-  defp init_function_pipe(sup_pid, {pipeline_module, function, opts}, prev_pids) do
+  defp init_function_pipe(sup_pid, {type, pipeline_module, function, opts}, prev_pids) do
     name = String.to_atom("Flowex_#{pipeline_module}.#{function}_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Stage,
-                         [{pipeline_module, function, opts, prev_pids}, [name: name]],
+                         [{type, pipeline_module, function, opts, prev_pids}, [name: name]],
                          [id: name])
     {:ok, _pid} = Supervisor.start_child(sup_pid, worker_spec)
     name
   end
 
-  defp init_module_pipe(sup_pid, {module, opts}, prev_pids) do
+  defp init_module_pipe(sup_pid, {type, module, opts}, prev_pids) do
     opts = module.init(opts)
     name = String.to_atom("Flowex_#{module}.call_#{inspect make_ref()}")
     worker_spec = worker(Flowex.Stage,
-                         [{module, :call, opts, prev_pids}, [name: name]],
+                         [{type, module, :call, opts, prev_pids}, [name: name]],
                          [id: name])
     {:ok, _pid} = Supervisor.start_child(sup_pid, worker_spec)
     name

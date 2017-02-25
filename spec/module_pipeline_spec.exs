@@ -26,7 +26,7 @@ defmodule ModulePipelineSpec do
     end
   end
 
-  describe ".run" do
+  describe ".call" do
     let :pipeline, do: ModulePipeline.start(opts())
     let :output, do: ModulePipeline.call(pipeline(), %ModulePipeline{number: 2})
 
@@ -51,6 +51,32 @@ defmodule ModulePipelineSpec do
       it "returns the same results" do
         expected = Enum.map(attempts(), fn(_) -> 3 end)
         assert shared.numbers == expected
+      end
+    end
+  end
+
+  context "when error inside stage" do
+    let :pipeline, do: ModulePipeline.start(opts())
+    let :output, do: ModulePipeline.call(pipeline(), %ModulePipeline{number: :not_a_number})
+
+    it "return struct with error" do
+      expect(output().__struct__).to eq(ModulePipeline)
+      expect(output().number.__struct__).to eq(Flowex.StageError)
+    end
+
+    context "checks error" do
+      let :error, do: output().number
+
+      it "has message" do
+        expect(error().message).to eq("bad argument in arithmetic expression")
+      end
+
+      it "has pipe info" do
+        expect(error().pipe).to eq({AddOne, :call, %{a: :add_one, b: :b, c: :c}})
+      end
+
+      it "has struct info" do
+        expect(error().struct).to eq(%ModulePipeline{number: :not_a_number})
       end
     end
   end
