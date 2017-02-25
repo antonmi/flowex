@@ -28,7 +28,7 @@ defmodule Flowex.Pipeline do
     quote do
       def pipes, do: Enum.reverse(@pipes)
 
-      def run(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
+      def call(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
         out_pid = link_to_consumer(out_name)
         ip = %Flowex.IP{struct: struct, requester: pid}

@@ -31,7 +31,7 @@ defmodule FunPipelineSpec do
   describe ".run" do
     let :opts, do: %{a: :a, b: :b, c: :c}
     let :pipeline, do: FunPipeline.start(opts())
-    let :output, do: FunPipeline.run(pipeline(), %FunPipeline{number: 2})
+    let :output, do: FunPipeline.call(pipeline(), %FunPipeline{number: 2})
 
     it do: assert output().number == 3
 
@@ -46,7 +46,7 @@ defmodule FunPipelineSpec do
 
       before do
         numbers = Enum.map(attempts(), fn(_) ->
-          FunPipeline.run(pipeline(), %FunPipeline{number: 2}).number
+          FunPipeline.call(pipeline(), %FunPipeline{number: 2}).number
         end)
         {:ok, numbers: numbers}
       end

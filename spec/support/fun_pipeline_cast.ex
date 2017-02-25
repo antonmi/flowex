@@ -1,4 +1,4 @@
-defmodule AsyncFunPipeline do
+defmodule FunPipelineCast do
   use Flowex.Pipeline
 
   pipe :add_one

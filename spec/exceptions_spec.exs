@@ -20,7 +20,7 @@ defmodule ExceptionsSpec do
 
   context "with crash" do
     def run_pipeline(struct) do
-      Pipeline.run(ExceptionsSpec.pipeline(), struct)
+      Pipeline.call(ExceptionsSpec.pipeline(), struct)
     end
 
     let :func do
