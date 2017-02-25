@@ -1,5 +1,5 @@
 defmodule ExceptionsSpec do
-  use ESpec
+  use ESpec, async: true
 
   defmodule Pipeline do
     use Flowex.Pipeline

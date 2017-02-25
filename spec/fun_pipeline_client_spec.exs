@@ -47,6 +47,22 @@ defmodule FunPipelineClientSpec do
       end
     end
 
+    describe ".cast" do
+      let :pipeline, do: AsyncFunPipeline.start()
+      let_ok :client_pid, do: Flowex.Client.start(pipeline())
+
+      before do
+        pid = self()
+        Flowex.Client.cast(client_pid(),  %AsyncFunPipeline{number: 2, pid: pid})
+        {:shared, pid: pid}
+      end
+
+      it "receives result" do
+        pid = shared.pid
+        assert_receive(%AsyncFunPipeline{number: 3, pid: ^pid}, 100)
+      end
+    end
+
     describe ".run!" do
       let! :result, do: Flowex.Client.run!(pipeline(), %FunPipeline{number: 2})
 
