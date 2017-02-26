@@ -16,6 +16,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Flowex magic!](#flowex-magic!)
 - [Run the pipeline](#run-the-pipeline)
 - [How it works](#how-it-works)
+- [Error handling](#error-handling)
 - [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
 - [Bottlenecks](#bottlenecks)
 - [Module pipelines](#module-pipelines)
@@ -125,7 +126,8 @@ end
 ```
 We also renamed the module to `FunPipeline` because we are going to create "Flowex pipeline".
 `Flowex.Pipeline` extend our module, so we have:
-- `pipe` macros to define which function evaluation should be placed into separate GenStage;
+- `pipe` macro to define which function evaluation should be placed into separate GenStage;
+- `error_pipe` macro to define function which will be called if error occurs;
 - `start` and `stop` functions to create and destroy pipelines;
 - `call` function to run pipeline computations synchronously.
 - `cast` function to run pipeline computations asynchronously.
@@ -143,6 +145,7 @@ pipeline = FunPipeline.start(opts)
 ```
 What happened:
 - Three GenStages were started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
+- One additional GenStage for error processing is started (it is also `:producer_consumer`);
 - Runs 'producer' and 'consumer' GenStages for input and output;
 - All the components are placed under Supervisor.
 
@@ -198,11 +201,55 @@ Flowex.Client.cast(client_pid, %FunPipeline{number: 2})
 ## How it works
 The following figure demonstrates the way data follows:
 ![alt text](figures/pipeline_with_client.png "How it works")
-The things happen when you call `Flowex.Client.call`:
-- `self` process makes synchronous call to the client gen_server with `%FunPipeline{number: 2}` struct
-- the client makes synchronous call 'FunPipeline.call(pipeline, %FunPipeline{number: 2})'
-- the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another
+Note: `error_pipe` is not on the picture in order to save place.
+
+The things happen when you call `Flowex.Client.call` (synchronous):
+- `self` process makes synchronous call to the client gen_server with `%FunPipeline{number: 2}` struct;
+- the client makes synchronous call 'FunPipeline.call(pipeline, %FunPipeline{number: 2})';
+- the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another;
 - when the consumer receives the Information Packet (IP), it sends it back to the client which sends it back to the caller process.
+
+The things happen when you `cast` pipeline (asynchronous):
+- `self` process makes `cast` call to the client and immediately receives `:ok`
+- the client makes `cast` to pipeline;
+- the struct is wrapped into `%Flowex.IP{}` struct and begins its asynchronous journey from one GenStage to another;
+- consumer does not send data back, because this is `cast`
+
+## Error handling
+What happens when error occurs in some pipe?
+
+The pipeline behavior is like Either monad. If everything ok, each 'pipe' function will be called one by one and result data will skip the 'error_pipe'.
+But if error happens, for example, in the first pipe, the `:mult_by_two` and `:minus_three` functions will not be called.
+IP will bypass to the 'error_pipe'. If you don't specify 'error_pipe' flowex will add the default one:
+```elixir
+def handle_error(error, _struct, _opts) do
+  raise error
+end
+```
+which just raises an exception.
+
+To specify the 'error' function use `error_pipe` macro:
+```elixir
+defmodule FunPipeline do
+  use Flowex.Pipeline
+  # ...
+  error_pipe :if_error
+
+
+  def if_error(error, struct, opts) do
+    # error is %Flowex.StageError{}
+    # with :message, :pipe, and :struct fields
+    %{struct | number: :oops}
+  end
+  #...
+end
+```
+You can specify only one error_pipe!
+Note: The 'error_pipe' function accepts three arguments.
+The first argument is a `%Flowex.StageError{}` structure which has the following fields:
+- `:message` - error message;
+- `:pipe` - is `{module, function, opts}` tuple containing info about the pipe where error occured;
+- `:struct` - the input of the pipe.
 
 ## Synchronous and asynchronous calls
 Note, that `call` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
@@ -226,12 +273,14 @@ defmodule FunPipeline do
   pipe :add_one, 1
   pipe :mult_by_two, 3
   pipe :minus_three, 2
+  error_pipe :if_error, 2
 
   # ...
 end
 ```
 And the pipeline will look like on the figure below:
 ![alt text](figures/complex_pipeline.png "Group of clients")
+
 
 ## Module pipelines
 One can create reusable 'pipe' - module which implements init and call functions.
@@ -244,6 +293,7 @@ defmodule ModulePipeline do
   pipe AddOne, 1
   pipe MultByTwo, 3
   pipe MinusThree, 2
+  error_pipe IfError, 2
 end
 
 #pipes
@@ -280,7 +330,18 @@ defmodule MinusThree do
     %{struct | number: new_number, c: opts.c}
   end
 end
+
+defmodule IfError do
+  def init(opts) do
+    %{opts | c: :minus_three}
+  end
+
+  def call(_error, struct, _opts) do
+    %{struct | number: :oops}
+  end
+end
 ```
+
 Of course, one can combine module and functional 'pipes'!
 
 ## Contributing
