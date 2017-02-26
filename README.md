@@ -237,7 +237,7 @@ defmodule FunPipeline do
 
 
   def if_error(error, struct, opts) do
-    # error is %Flowex.StageError{}
+    # error is %Flowex.PipeError{} structure
     # with :message, :pipe, and :struct fields
     %{struct | number: :oops}
   end
@@ -246,7 +246,7 @@ end
 ```
 You can specify only one error_pipe!
 Note: The 'error_pipe' function accepts three arguments.
-The first argument is a `%Flowex.StageError{}` structure which has the following fields:
+The first argument is a `%Flowex.PipeError{}` structure which has the following fields:
 - `:message` - error message;
 - `:pipe` - is `{module, function, opts}` tuple containing info about the pipe where error occured;
 - `:struct` - the input of the pipe.

@@ -29,6 +29,6 @@ defmodule WithSeveralErrorPipesSpec do
 
   it "return struct with error" do
     expect(result().__struct__).to eq(Pipeline)
-    expect(result().error.__struct__).to eq(Flowex.StageError)
+    expect(result().error.__struct__).to eq(Flowex.PipeError)
   end
 end

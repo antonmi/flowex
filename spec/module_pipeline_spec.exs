@@ -61,7 +61,7 @@ defmodule ModulePipelineSpec do
 
     it "return struct with error" do
       expect(output().__struct__).to eq(ModulePipeline)
-      expect(output().number.__struct__).to eq(Flowex.StageError)
+      expect(output().number.__struct__).to eq(Flowex.PipeError)
     end
 
     context "checks error" do
