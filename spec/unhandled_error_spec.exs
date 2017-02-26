@@ -5,11 +5,11 @@ defmodule UnhandledErrorSpec do
     use Flowex.Pipeline
 
     defstruct data: nil
-    pipe :one
-    pipe :fun
-    pipe :second
-    pipe :at_the_end
-    error_pipe :if_error
+    pipe :one, 2
+    pipe :fun, 2
+    pipe :second, 2
+    pipe :at_the_end, 2
+    error_pipe :if_error, 2
 
     def one(struct, _opts), do: struct
 
