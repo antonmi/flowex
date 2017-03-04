@@ -144,10 +144,10 @@ pipeline = FunPipeline.start(opts)
  sup_pid: #PID<0.136.0>}
 ```
 What happened:
-- Three GenStages were started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
-- One additional GenStage for error processing is started (it is also `:producer_consumer`);
-- Runs 'producer' and 'consumer' GenStages for input and output;
-- All the components are placed under Supervisor.
+- Three GenStages have been started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
+- One additional GenStage for error processing has been started (it is also `:producer_consumer`);
+- 'producer' and 'consumer' GenStages for input and output have been added;
+- All the components have been placed under Supervisor.
 
 The next picture shows what the 'pipeline' is.
 ![alt text](figures/fun_pipeline.png "FunPipeline")
