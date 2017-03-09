@@ -20,6 +20,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
 - [Bottlenecks](#bottlenecks)
 - [Module pipes](#module-pipes)
+- [Starting strategies](#starting-strategies)
 - [Contributing](#contributing)
 
 ## Installation
@@ -128,7 +129,7 @@ We also renamed the module to `FunPipeline` because we are going to create "Flow
 `Flowex.Pipeline` extend our module, so we have:
 - `pipe` macro to define which function evaluation should be placed into separate GenStage;
 - `error_pipe` macro to define function which will be called if error occurs;
-- `start` and `stop` functions to create and destroy pipelines;
+- `start`, `supervised_start` and `stop` functions to create and destroy pipelines;
 - `call` function to run pipeline computations synchronously.
 - `cast` function to run pipeline computations asynchronously.
 
@@ -159,6 +160,8 @@ The `start` function returns a `%Flowex.Pipeline{}` struct with the following fi
 - sup_pid - pid of the pipeline supervisor
 
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
+There is `supervised_start` function which allows to place pipeline's under external supervisor.
+See details in [Starting strategies](#starting-strategies) section.
 
 ## Run the pipeline
 One can run calculations in pipeline synchronously and asynchronously:
@@ -343,6 +346,61 @@ end
 ```
 
 Of course, one can combine module and functional 'pipes'!
+
+## Starting strategies
+Using `start/1` function one can start pipelines in any process. Pipelines will be alive while the process is alive.
+The `supervised_start` function accepts supervisor `pid` as the first argument and `opts` as the second argument.
+And starts pipeline's supervisor under predefined supervisor process.
+
+In general there are three ways to start pipelines in your project:
+
+1. Start pipelines in arbitrary supervised process:
+```elixir
+defmodule PipelineGenServer do
+  use GenServer
+
+  def init(_opts) do
+    pipeline_one = PipelineOne.start
+    pipeline_two = PipelineTwo.start
+
+    {:ok, %{pipeline_one: pipeline_one, pipeline_two: pipeline_two}}
+  end
+end
+```
+You can also store pipeline structure in Agent or Application environment.
+
+2. Start one pipeline per application. In that case pipeline supervisor will be the main supervisor in the application:
+```elixir
+defmodule OnePipelinePerApp do
+  use Application
+
+  def start(_type, _opts) do
+    pipeline = PipelineOne.start
+    Application.put_env(:start_flowex, :pipeline, pipeline)
+    {:ok, pipeline.sup_pid}
+  end
+end
+```
+
+ 3. Start several pipelines inside one application using `supervised_start` function. In that case pipeline supervisors will be placed under application supervisor:
+```elixir
+defmodule TwoPipelinesPerApp do
+  use Application
+
+  def start(_type, _opts) do
+    {:ok, supervisor_pid} = Supervisor.start_link([], strategy: :one_for_one, name: :multi_flowex_sup)
+
+    pipeline_one = PipelineOne.supervised_start(supervisor_pid)
+    pipeline_two = PipelineTwo.supervised_start(supervisor_pid)
+
+    Application.put_env(:start_flowex, :pipeline_one, pipeline_one)
+    Application.put_env(:start_flowex, :pipeline_two, pipeline_two)
+
+    {:ok,supervisor_pid}
+  end
+end
+
+Yuo can find the examples in [Start-Flowex](https://github.com/antonmi/Start-Flowex) project 
 
 ## Contributing
 #### Contributions are welcome and appreciated!
