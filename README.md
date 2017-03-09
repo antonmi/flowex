@@ -399,8 +399,9 @@ defmodule TwoPipelinesPerApp do
     {:ok,supervisor_pid}
   end
 end
+```
 
-Yuo can find the examples in [Start-Flowex](https://github.com/antonmi/Start-Flowex) project 
+You can find the examples in ['Start-Flowex'](https://github.com/antonmi/Start-Flowex) project 
 
 ## Contributing
 #### Contributions are welcome and appreciated!
