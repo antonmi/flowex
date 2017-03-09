@@ -30,19 +30,18 @@ defmodule UnhandledErrorSpec do
   end
 
   context "with crash" do
-    def run_pipeline(struct) do
-      pipeline = Pipeline.start
-      Pipeline.call(pipeline, struct)
-    end
+    let :pipeline, do: Pipeline.start
 
     let :func do
-      fn -> run_pipeline(%Pipeline{data: :fail}) end
+      fn ->
+        Pipeline.call(UnhandledErrorSpec.pipeline() ,%Pipeline{data: :fail})
+      end
     end
 
     it "raises a Flowex.PipelineError but still works" do
       expect(func()).to raise_exception(Flowex.PipelineError)
       Process.sleep(100)
-      expect(run_pipeline(%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
+      expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
     end
   end
 end

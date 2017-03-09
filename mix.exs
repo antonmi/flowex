@@ -30,9 +30,7 @@ defmodule Flowex.Mixfile do
   end
 
   defp description do
-    """
-      Flow-Based Programming with Elixir GenStage.
-    """
+    "Flow-Based Programming with Elixir GenStage."
   end
 
   defp package do
