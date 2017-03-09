@@ -48,31 +48,27 @@ defmodule Flowex.Pipeline do
 
       def call(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
-        out_pid = link_to_consumer(out_name)
+        ref = Process.monitor(out_name)
         ip = %Flowex.IP{struct: struct, requester: pid}
+
         GenServer.cast(out_name, {in_name, ip})
+
         receive do
           %Flowex.IP{requester: ^pid} = ip ->
+            Process.demonitor(ref)
             ip.struct
-          {:EXIT, ^out_pid, reason} ->
+          {:DOWN, ^ref, _, _, reason} ->
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
           smth ->
             reason = "Expected %Flowex.IP{}, received #{inspect smth}"
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
         end
+
       end
 
       def cast(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         ip = %Flowex.IP{struct: struct, requester: false}
         GenServer.cast(out_name, {in_name, ip})
-      end
-
-      defp link_to_consumer(out_name) do
-        out_pid = Process.whereis(out_name)
-
-        Process.link(out_pid)
-        Process.flag(:trap_exit, true)
-        out_pid
       end
     end
   end
