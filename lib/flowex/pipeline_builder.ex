@@ -3,6 +3,24 @@ defmodule Flowex.PipelineBuilder do
 
   def start(pipeline_module, opts) do
     {:ok, sup_pid} = Flowex.Supervisor.start_link(pipeline_module)
+    do_start(sup_pid, pipeline_module, opts)
+  end
+
+  def supervised_start(pipeline_module, pid, opts) do
+    sup_spec = supervisor(Flowex.Supervisor, [pipeline_module], [id: "Flowex.Supervisor_#{inspect make_ref()}", restart: :permanent])
+    {:ok, sup_pid} = Supervisor.start_child(pid, sup_spec)
+    do_start(sup_pid, pipeline_module, opts)
+  end
+
+  def stop(sup_pid) do
+    Supervisor.which_children(sup_pid)
+    |> Enum.each(fn({id, _pid, :worker, [_]}) ->
+      Supervisor.terminate_child(sup_pid, id)
+    end)
+    Supervisor.stop(sup_pid)
+  end
+
+  defp do_start(sup_pid, pipeline_module, opts) do
     [{producer_name, _in_producer, :worker, [Flowex.Producer]}] = Supervisor.which_children(sup_pid)
 
     last_names = (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
@@ -21,14 +39,6 @@ defmodule Flowex.PipelineBuilder do
     {:ok, _out_consumer_pid} = Supervisor.start_child(sup_pid, worker_spec)
 
     %Flowex.Pipeline{module: pipeline_module, in_name: producer_name, out_name: consumer_name, sup_pid: sup_pid}
-  end
-
-  def stop(sup_pid) do
-    Supervisor.which_children(sup_pid)
-    |> Enum.each(fn({id, _pid, :worker, [_]}) ->
-      Supervisor.terminate_child(sup_pid, id)
-    end)
-    Supervisor.stop(sup_pid)
   end
 
   defp init_function_pipe(sup_pid, {type, pipeline_module, function, opts}, prev_pids) do

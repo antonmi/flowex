@@ -2,7 +2,7 @@ defmodule Flowex.Supervisor do
   use Supervisor
 
   def start_link(pipeline_module) do
-    Supervisor.start_link(__MODULE__, pipeline_module)
+    Elixir.Supervisor.start_link(__MODULE__, [pipeline_module])
   end
 
   def init(pipeline_module) do

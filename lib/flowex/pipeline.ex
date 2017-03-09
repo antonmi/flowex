@@ -27,6 +27,10 @@ defmodule Flowex.Pipeline do
         Flowex.PipelineBuilder.start(__MODULE__, opts)
       end
 
+      def supervised_start(pid, opts \\ %{}) do
+        Flowex.PipelineBuilder.supervised_start(__MODULE__, pid, opts)
+      end
+
       def stop(%Flowex.Pipeline{sup_pid: sup_pid}) do
         Flowex.PipelineBuilder.stop(sup_pid)
       end
