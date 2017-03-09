@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/antonmi/flowex.svg?branch=master)](https://travis-ci.org/antonmi/flowex)
 [![Hex.pm](https://img.shields.io/hexpm/v/flowex.svg?style=flat-square)](https://hex.pm/packages/flowex)
 
-## Railway Flow-Based Programming with Elixir GenStage.
-#### Flowex is a set of abstractions build on top Elixir GenStage which allows writing program with [Flow-Based Programming](https://en.wikipedia.org/wiki/Flow-based_programming) paradigm.
+## Railway Flow-Based Programming.
+#### Flowex is a set of abstractions built on top Elixir GenStage which allows writing program with [Flow-Based Programming](https://en.wikipedia.org/wiki/Flow-based_programming) paradigm.
 I would say it is a mix of FBP and so-called [Railway Oriented Programming (ROP)](http://fsharpforfunandprofit.com/rop/) approach.
 
 Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
@@ -19,7 +19,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Error handling](#error-handling)
 - [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
 - [Bottlenecks](#bottlenecks)
-- [Module pipelines](#module-pipelines)
+- [Module pipes](#module-pipes)
 - [Contributing](#contributing)
 
 ## Installation
@@ -144,10 +144,10 @@ pipeline = FunPipeline.start(opts)
  sup_pid: #PID<0.136.0>}
 ```
 What happened:
-- Three GenStages were started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
-- One additional GenStage for error processing is started (it is also `:producer_consumer`);
-- Runs 'producer' and 'consumer' GenStages for input and output;
-- All the components are placed under Supervisor.
+- Three GenStages have been started - one for each of the function in pipeline. Each of GenStages is `:producer_consumer`;
+- One additional GenStage for error processing has been started (it is also `:producer_consumer`);
+- 'producer' and 'consumer' GenStages for input and output have been added;
+- All the components have been placed under Supervisor.
 
 The next picture shows what the 'pipeline' is.
 ![alt text](figures/fun_pipeline.png "FunPipeline")
@@ -282,7 +282,7 @@ And the pipeline will look like on the figure below:
 ![alt text](figures/complex_pipeline.png "Group of clients")
 
 
-## Module pipelines
+## Module pipes
 One can create reusable 'pipe' - module which implements init and call functions.
 ```elixir
 defmodule ModulePipeline do
