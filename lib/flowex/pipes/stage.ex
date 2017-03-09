@@ -33,7 +33,7 @@ defmodule Flowex.Stage do
       %{ip | struct: apply(module, function, [ip.struct, opts])}
     rescue
       error ->
-        %{ip | error: %Flowex.PipeError{message: error.message, pipe: {module, function, opts}, struct: ip.struct}}
+        %{ip | error: %Flowex.PipeError{message: Exception.message(error), pipe: {module, function, opts}, struct: ip.struct}}
     end
   end
 end
