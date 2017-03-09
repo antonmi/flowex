@@ -7,7 +7,7 @@ defmodule Flowex.PipelineBuilder do
   end
 
   def supervised_start(pipeline_module, pid, opts) do
-    sup_spec = supervisor(Flowex.Supervisor, [pipeline_module], [id: "Flowex.Supervisor_#{inspect make_ref()}", restart: :permanent])
+    sup_spec = supervisor(Flowex.Supervisor, pipeline_module, [id: "Flowex.Supervisor_#{inspect make_ref()}", restart: :permanent])
     {:ok, sup_pid} = Supervisor.start_child(pid, sup_spec)
     do_start(sup_pid, pipeline_module, opts)
   end
