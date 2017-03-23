@@ -10,9 +10,9 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 #### Dedicated to my lovely girlfriend Chryścina.
 
 ## Resources
-- [Railway Flow-Based Programming with Flowex](https://medium.com/@anton.mishchuk/railway-flow-based-programming-with-flowex-ef04fd338e41#.wiy3c5g9i)
-- [Flowex: Flow-Based Programming with Elixir GenStage](https://www.slideshare.net/Elixir-Meetup/flowex-flowbased-programming-with-elixir-genstage-anton-mishchuk)
-- [Flow-based programming with Elixir](https://www.slideshare.net/AntonMishchuk/flowbased-programming-with-elixir)
+- [Railway Flow-Based Programming with Flowex](https://medium.com/@anton.mishchuk/railway-flow-based-programming-with-flowex-ef04fd338e41#.wiy3c5g9i) - post on medium.com
+- [Flowex: Flow-Based Programming with Elixir GenStage](https://www.slideshare.net/Elixir-Meetup/flowex-flowbased-programming-with-elixir-genstage-anton-mishchuk) - presentation
+- [Flow-based programming with Elixir](https://www.slideshare.net/AntonMishchuk/flowbased-programming-with-elixir) - presentation
 
 ## Contents
 - [Installation](#installation)
