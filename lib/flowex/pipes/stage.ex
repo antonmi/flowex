@@ -21,8 +21,10 @@ defmodule Flowex.Stage do
 
   def handle_events([ip], _from, {:error_pipe, module, function, opts}) do
     if ip.error do
-      new_ip = %{ip | struct: apply(module, function, [ip.error, ip.struct, opts])}
-      {:noreply, [new_ip], {:error_pipe, module, function, opts}}
+      struct = struct(module.__struct__, ip.struct)
+      result = apply(module, function, [ip.error, struct, opts])
+      ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
+      {:noreply, [%{ip | struct: ip_struct}], {:error_pipe, module, function, opts}}
     else
       {:noreply, [ip], {:error_pipe, module, function, opts}}
     end
@@ -30,7 +32,10 @@ defmodule Flowex.Stage do
 
   defp try_apply(ip, {module, function, opts}) do
     try do
-      %{ip | struct: apply(module, function, [ip.struct, opts])}
+      struct = struct(module.__struct__, ip.struct)
+      result = apply(module, function, [struct, opts])
+      ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
+      %{ip | struct: ip_struct}
     rescue
       error ->
         %{ip | error: %Flowex.PipeError{message: Exception.message(error), pipe: {module, function, opts}, struct: ip.struct}}

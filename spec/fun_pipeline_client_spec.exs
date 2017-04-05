@@ -54,12 +54,10 @@ defmodule FunPipelineClientSpec do
       before do
         pid = self()
         Flowex.Client.cast(client_pid(),  %FunPipelineCast{number: 2, pid: pid})
-        {:shared, pid: pid}
       end
 
       it "receives result" do
-        pid = shared.pid
-        assert_receive(%FunPipelineCast{number: 3, pid: ^pid}, 100)
+        assert_receive(3, 100)
       end
     end
 

@@ -49,14 +49,14 @@ defmodule Flowex.Pipeline do
       def call(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
         pid = self()
         ref = Process.monitor(out_name)
-        ip = %Flowex.IP{struct: struct, requester: pid}
+        ip = %Flowex.IP{struct: Map.delete(struct, :__struct__), requester: pid}
 
         GenServer.cast(out_name, {in_name, ip})
 
         receive do
           %Flowex.IP{requester: ^pid} = ip ->
             Process.demonitor(ref)
-            ip.struct
+            struct(%__MODULE__{}, ip.struct)
           {:DOWN, ^ref, _, _, reason} ->
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
           smth ->
@@ -67,7 +67,7 @@ defmodule Flowex.Pipeline do
       end
 
       def cast(%Flowex.Pipeline{in_name: in_name, out_name: out_name} = pipeline, struct = %__MODULE__{}) do
-        ip = %Flowex.IP{struct: struct, requester: false}
+        ip = %Flowex.IP{struct: Map.delete(struct, :__struct__), requester: false}
         GenServer.cast(out_name, {in_name, ip})
       end
     end

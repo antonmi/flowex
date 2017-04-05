@@ -41,7 +41,7 @@ defmodule WithErrorPipeSpec do
     end
 
     it "has struct info" do
-      expect(error().struct).to eq(%WithErrorPipeSpec.Pipeline{data: nil, error: nil})
+      expect(error().struct).to eq(%{data: nil, error: nil})
     end
   end
 end

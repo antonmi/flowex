@@ -1,55 +1,62 @@
 defmodule ModulePipeline do
   use Flowex.Pipeline
 
-  defstruct number: nil, a: nil, b: nil, c: nil
+  defstruct [:number, :a, :b, :c]
 
   pipe AddOne, 1
   pipe MultByTwo, 3
+  pipe :do_nothing, 2
   pipe MinusThree, 2
   error_pipe IfError, 3
+
+  def do_nothing(struct, _opts) do
+    struct
+  end
 end
 
 #pipes
 defmodule AddOne do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | a: :add_one}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number + 1
-    %{struct | number: new_number, a: opts.a}
+  def call(%{number: number}, %{a: a}) do
+    %{number: number + 1, a: a}
   end
 end
 
 defmodule MultByTwo do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | b: :mult_by_two}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number * 2
-    %{struct | number: new_number, b: opts.b}
+  def call(%{number: number}, %{b: b}) do
+    %{number: number * 2, b: b}
   end
 end
 
 defmodule MinusThree do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | c: :minus_three}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number - 3
-    %{struct | number: new_number, c: opts.c}
+  def call(%{number: number}, %{c: c}) do
+    %{number: number - 3, c: c}
   end
 end
 
-
 defmodule IfError do
-  def init(opts) do
-    %{opts | c: :minus_three}
-  end
+  defstruct [:number]
 
-  def call(error, struct, _opts) do
-    %{struct | number: error}
+  def init(opts), do: opts
+
+  def call(error, %{number: _number}, _opts) do
+    %{number: error}
   end
 end

@@ -76,7 +76,7 @@ defmodule ModulePipelineSpec do
       end
 
       it "has struct info" do
-        expect(error().struct).to eq(%ModulePipeline{number: :not_a_number})
+        expect(error().struct[:number]).to eq(:not_a_number)
       end
     end
   end

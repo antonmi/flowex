@@ -57,39 +57,35 @@ To satisfy the FBP approach we need to place each of the function into a separat
 That, in short, is the idea of Flowex!
 
 ## More complex example for understanding interface
-Let's define a more strict interface for our function. Flowex uses the same approach as [Plug](https://github.com/elixir-lang/plug).
-So each of the function must receive a predefined struct as a first argument and return the struct of the same type:
+Let's define a more strict interface for our function.
+So each of the function will receive a predefined struct as a first argument and will return a map:
 
 ```elixir
-def add_one(struct, opts) do
-  new_number = struct.number + 1
-  %{struct | number: new_number, a: opts.a}
+def add_one(%{number: number}, opts) do
+  %{number: number + 1, a: opts.a}
 end
 ```
-The function receives a structure with `number` and `a` fields and returns modified structure or the same type.
+The function receives a structure with `number` field and the options map with field `a`  and returns map with new number.
 The second argument is a set of options and will be described later.
 Let's rewrite the whole `Functions` module in the following way:
 ```elixir
 defmodule Functions do
   defstruct number: nil, a: nil, b: nil, c: nil
 
-  def add_one(struct, opts) do
-    new_number = struct.number + 1
-    %{struct | number: new_number, a: opts.a}
+  def add_one(%{number: number}, %{a: a}) do
+    %{number: number + 1, a: a}
   end
 
-  def mult_by_two(struct, opts) do
-    new_number = struct.number * 2
-    %{struct | number: new_number, b: opts.b}
+  def mult_by_two(%{number: number}, %{b: b}) do
+    %{number: number * 2, b: b}
   end
 
-  def minus_three(struct, opts) do
-    new_number = struct.number - 3
-    %{struct | number: new_number, c: opts.c}
+  def minus_three(%{number: number}, %{c: c}) do
+    %{number: number - 3, c: c}
   end
 end
 ```
-The code is more complex but more solid. The module defines three functions with the same interface.
+The module defines three functions with the similar interface.
 We also defined as struct `%Functions{}` which defines a data-structure being passed to the functions.
 
 The main module may look like:
@@ -117,9 +113,8 @@ defmodule FunPipeline do
 
   defstruct number: nil, a: nil, b: nil, c: nil
 
-  def add_one(struct, opts) do
-    new_number = struct.number + 1
-    %{struct | number: new_number, a: opts.a}
+  def add_one(%{number: number}, %{a: a}) do
+    %{number: number + 1, a: a}
   end
 
   # mult_by_two and minus_three definitions skipped
@@ -242,7 +237,7 @@ defmodule FunPipeline do
   def if_error(error, struct, opts) do
     # error is %Flowex.PipeError{} structure
     # with :message, :pipe, and :struct fields
-    %{struct | number: :oops}
+    %{number: :oops}
   end
   #...
 end
@@ -287,11 +282,12 @@ And the pipeline will look like on the figure below:
 
 ## Module pipes
 One can create reusable 'pipe' - module which implements init and call functions.
+Each module must define a struct it works with. Only fields defined it the stuct will be passed to `call` function.
 ```elixir
 defmodule ModulePipeline do
   use Flowex.Pipeline
 
-  defstruct number: nil, a: nil, b: nil, c: nil
+  defstruct [:number, :a, :b, :c]
 
   pipe AddOne, 1
   pipe MultByTwo, 3
@@ -302,50 +298,104 @@ end
 #pipes
 
 defmodule AddOne do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | a: :add_one}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number + 1
-    %{struct | number: new_number, a: opts.a}
+  def call(%{number: number}, %{a: a}) do
+    %{number: number + 1, a: a}
   end
 end
 
 defmodule MultByTwo do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | b: :mult_by_two}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number * 2
-    %{struct | number: new_number, b: opts.b}
+  def call(%{number: number}, %{b: b}) do
+    %{number: number * 2, b: b}
   end
 end
 
 defmodule MinusThree do
+  defstruct [:number]
+
   def init(opts) do
     %{opts | c: :minus_three}
   end
 
-  def call(struct, opts) do
-    new_number = struct.number - 3
-    %{struct | number: new_number, c: opts.c}
+  def call(%{number: number}, %{c: c}) do
+    %{number: number - 3, c: c}
   end
 end
 
 defmodule IfError do
-  def init(opts) do
-    %{opts | c: :minus_three}
-  end
+  defstruct [:number]
 
-  def call(_error, struct, _opts) do
-    %{struct | number: :oops}
+  def init(opts), do: opts
+
+  def call(error, %{number: _number}, _opts) do
+    %{number: error}
   end
 end
 ```
 
 Of course, one can combine module and functional 'pipes'!
+
+## Data available in pipes
+If your pipeline consists of function pipes only, each function will receive pipeline struct as an input.
+The situation is a little more complex with module pipes.
+Each module defines its own struct and data will be cast to that struct.
+Map returned from the `call function` will be merged to the previos data.
+Let's consider an example:
+```elixir
+defmodule DataAvailable do
+  use Flowex.Pipeline
+
+  defstruct [:top, :c1, :foo]
+
+  pipe Component1
+  pipe :component2
+  pipe Component3
+
+  def component2(%__MODULE__{top: top}, _opts) do
+    %{top: top + 2, c3: 2}
+  end
+end
+
+defmodule Component1 do
+  defstruct [:top, :c1]
+  def init(opts), do: opts
+
+  def call(%__MODULE__{c1: c1, top: top}, _opts) do
+    %{top: top + c1, bar: :baz}
+  end
+end
+
+defmodule Component3 do
+  defstruct [:c3, :top]
+  def init(opts), do: opts
+
+  def call(%__MODULE__{c3: c3, top: top}, _opts) do
+    %{top: top + c3, c3: top - c3, foo: :set_foo}
+  end
+end
+```
+And suppose we passed `%DataAvailable{top: 100, c1: 1}` to `DataAvailable.call` function.
+
+Data in IP before calling first pipe is `%{c1: 1, foo: nil, top: 100}`.
+Before entering the first pipe the data will be cast to `%Component1{c1: 1, top: 100}`.
+The returned value of first pipe is merged to IP data, so the data is `%{bar: :baz, c1: 1, foo: nil, top: 101}`.
+
+Function `component2` receives `%DataAvailable{c1: 1, foo: nil, top: 101}` structure and returned value `%{c3: 2, top: 103}` is merged with previous data,
+so IP data is `%{bar: :baz, c1: 1, c3: 2, foo: nil, top: 103}`
+
+Last component receives `%Component3{c3: 2, top: 103}`, returns `%{c3: 101, foo: :set_foo, top: 105}` and data is `%{bar: :baz, c1: 1, c3: 101, foo: :set_foo, top: 105}`.
+Before returning data from pipeline they are casted to `DataAvailable` structure, so final result is `%DataAvailable{c1: 1, foo: :set_foo, top: 105}}`
 
 ## Starting strategies
 Using `start/1` function one can start pipelines in any process. Pipelines will be alive while the process is alive.
@@ -382,7 +432,7 @@ defmodule OnePipelinePerApp do
 end
 ```
 
- 3. Start several pipelines inside one application using `supervised_start` function. In that case pipeline supervisors will be placed under application supervisor:
+3. Start several pipelines inside one application using `supervised_start` function. In that case pipeline supervisors will be placed under application supervisor:
 ```elixir
 defmodule TwoPipelinesPerApp do
   use Application
@@ -401,7 +451,7 @@ defmodule TwoPipelinesPerApp do
 end
 ```
 
-You can find the examples in ['Start-Flowex'](https://github.com/antonmi/Start-Flowex) project 
+You can find the examples in ['Start-Flowex'](https://github.com/antonmi/Start-Flowex) project
 
 ## Contributing
 #### Contributions are welcome and appreciated!
