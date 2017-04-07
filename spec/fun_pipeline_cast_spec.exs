@@ -11,8 +11,7 @@ defmodule AsyncFunPipelineSpec do
     end
 
     it "receives result" do
-      pid = shared.pid
-      assert_receive(%FunPipelineCast{number: 3, pid: ^pid}, 100)
+      assert_receive(3, 100)
     end
 
     context "when running several times" do
@@ -22,7 +21,7 @@ defmodule AsyncFunPipelineSpec do
         Enum.each(attempts(), fn(_) ->
           pid = self()
           FunPipelineCast.cast(pipeline(), %FunPipelineCast{number: 2, pid: pid})
-          assert_receive(%FunPipelineCast{number: 3, pid: ^pid}, 100)
+          assert_receive(3, 100)
         end)
       end
     end

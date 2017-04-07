@@ -7,18 +7,15 @@ defmodule FunPipeline do
 
   defstruct number: nil, a: nil, b: nil, c: nil
 
-  def add_one(struct, opts) do
-    new_number = struct.number + 1
-    %{struct | number: new_number, a: opts.a}
+  def add_one(%{number: number}, %{a: a}) do
+    %{number: number + 1, a: a}
   end
 
-  def mult_by_two(struct, opts) do
-    new_number = struct.number * 2
-    %{struct | number: new_number, b: opts.b}
+  def mult_by_two(%{number: number}, %{b: b}) do
+    %{number: number * 2, b: b}
   end
 
-  def minus_three(struct, opts) do
-    new_number = struct.number - 3
-    %{struct | number: new_number, c: opts.c}
+  def minus_three(%{number: number}, %{c: c}) do
+    %{number: number - 3, c: c}
   end
 end
