@@ -1,4 +1,6 @@
 defmodule Flowex.Client do
+  @moduledoc "Absctraction to call the pipeline"
+
   use GenServer
 
   def start(pipeline) do

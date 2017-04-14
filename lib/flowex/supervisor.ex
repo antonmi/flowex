@@ -1,4 +1,6 @@
 defmodule Flowex.Supervisor do
+  @moduledoc "Pipeline supevisor"
+
   use Supervisor
 
   def start_link(pipeline_module) do

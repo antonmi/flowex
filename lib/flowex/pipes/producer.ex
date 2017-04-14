@@ -1,4 +1,6 @@
 defmodule Flowex.Producer do
+  @moduledoc "Pushes data to pipeline"
+
   use GenStage
 
   def start_link(nil, opts \\ []) do
@@ -15,7 +17,7 @@ defmodule Flowex.Producer do
     {:noreply, [], []}
   end
 
-  def handle_cast(%Flowex.IP{} = ip, ips) do
+  def handle_cast(ip = %Flowex.IP{}, ips) do
     {:noreply, [ip], ips}
   end
 end

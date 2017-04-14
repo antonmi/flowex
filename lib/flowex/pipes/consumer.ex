@@ -1,4 +1,6 @@
 defmodule Flowex.Consumer do
+  @moduledoc "Consumes the pipeline data"
+
   use GenStage
 
   def start_link(subscribe_to, opts \\ []) do

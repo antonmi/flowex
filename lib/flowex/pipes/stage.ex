@@ -1,4 +1,6 @@
 defmodule Flowex.Stage do
+  @moduledoc "Pipes function is called here"
+
   use GenStage
 
   def start_link(state, opts \\ []) do
@@ -31,14 +33,14 @@ defmodule Flowex.Stage do
   end
 
   defp try_apply(ip, {module, function, opts}) do
-    try do
       struct = struct(module.__struct__, ip.struct)
       result = apply(module, function, [struct, opts])
       ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
       %{ip | struct: ip_struct}
-    rescue
+  rescue
       error ->
-        %{ip | error: %Flowex.PipeError{message: Exception.message(error), pipe: {module, function, opts}, struct: ip.struct}}
-    end
+        %{ip | error: %Flowex.PipeError{message: Exception.message(error),
+                                        pipe: {module, function, opts},
+                                        struct: ip.struct}}
   end
 end

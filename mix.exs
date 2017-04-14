@@ -23,6 +23,7 @@ defmodule Flowex.Mixfile do
     [
       {:gen_stage, "0.11.0"},
       {:espec, "~> 1.3.4", only: :test},
+      {:credo, "0.7.2", only: [:dev, :test]},
       # Docs
       {:earmark, "~> 1.0.3", only: [:docs, :dev]},
       {:ex_doc, "~> 0.14.3", only: [:docs, :dev]}

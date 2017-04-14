@@ -1,4 +1,6 @@
 defmodule Flowex.PipelineBuilder do
+  @moduledoc "Defines functions to start and to stop a pipeline"
+
   import Supervisor.Spec
 
   def start(pipeline_module, opts) do
@@ -13,32 +15,46 @@ defmodule Flowex.PipelineBuilder do
   end
 
   def stop(sup_pid) do
-    Supervisor.which_children(sup_pid)
-    |> Enum.each(fn({id, _pid, :worker, [_]}) ->
+    Enum.each(Supervisor.which_children(sup_pid), fn({id, _pid, :worker, [_]}) ->
       Supervisor.terminate_child(sup_pid, id)
     end)
     Supervisor.stop(sup_pid)
   end
 
   defp do_start(sup_pid, pipeline_module, opts) do
-    [{producer_name, _in_producer, :worker, [Flowex.Producer]}] = Supervisor.which_children(sup_pid)
+    [{producer_name, _prod, :worker, [Flowex.Producer]}] = Supervisor.which_children(sup_pid)
 
-    last_names = (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
-    |> Enum.reduce([producer_name], fn({atom, count, type}, prev_pids) ->
-      (1..count)
-      |> Enum.map(fn(_i) ->
-        case Atom.to_char_list(atom) do
-          ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {type, atom, opts}, prev_pids)
-          _ ->  init_function_pipe(sup_pid, {type, pipeline_module, atom, opts}, prev_pids)
-        end
-      end)
-    end)
+    last_names = init_pipes(producer_name, {sup_pid, pipeline_module, opts})
 
-    consumer_name = String.to_atom("Flowex.Consumer_#{inspect pipeline_module}_#{inspect make_ref()}")
-    worker_spec = worker(Flowex.Consumer, [last_names, [name: consumer_name]], [id: consumer_name])
+    consumer_name = consumer_name(pipeline_module)
+    worker_spec = worker(Flowex.Consumer,
+                         [last_names, [name: consumer_name]],
+                         [id: consumer_name])
+
     {:ok, _out_consumer_pid} = Supervisor.start_child(sup_pid, worker_spec)
 
-    %Flowex.Pipeline{module: pipeline_module, in_name: producer_name, out_name: consumer_name, sup_pid: sup_pid}
+    %Flowex.Pipeline{module: pipeline_module, in_name: producer_name,
+                     out_name: consumer_name, sup_pid: sup_pid}
+  end
+
+  defp consumer_name(pipeline_module) do
+    String.to_atom("Flowex.Consumer_#{inspect pipeline_module}_#{inspect make_ref()}")
+  end
+
+  defp init_pipes(producer_name, {sup_pid, pipeline_module, opts}) do
+    (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
+    |> Enum.reduce([producer_name], fn({atom, count, type}, prev_pids) ->
+      Enum.map((1..count), fn(_i) ->
+        init_pipe({sup_pid, pipeline_module, opts}, {atom, type}, prev_pids)
+      end)
+    end)
+  end
+
+  def init_pipe({sup_pid, pipeline_module, opts}, {atom, type}, prev_pids) do
+    case Atom.to_char_list(atom) do
+      ~c"Elixir." ++ _ -> init_module_pipe(sup_pid, {type, atom, opts}, prev_pids)
+      _ ->  init_function_pipe(sup_pid, {type, pipeline_module, atom, opts}, prev_pids)
+    end
   end
 
   defp init_function_pipe(sup_pid, {type, pipeline_module, function, opts}, prev_pids) do
