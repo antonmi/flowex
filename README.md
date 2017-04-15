@@ -25,6 +25,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
 - [Bottlenecks](#bottlenecks)
 - [Module pipes](#module-pipes)
+- [Data available in pipes](#data-available-in-pipes)
 - [Starting strategies](#starting-strategies)
 - [Contributing](#contributing)
 
