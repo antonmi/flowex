@@ -58,6 +58,14 @@ defmodule Flowex.Pipeline do
       def pipes, do: Enum.reverse(@pipes)
       def error_pipe, do: @error_pipe
 
+      def pipe_info(name) do
+        if pipe = Enum.find(pipes(), &(elem(&1, 0) == name)) do
+          %{name: elem(pipe, 0), count: elem(pipe, 1), opts: elem(pipe, 2), type: elem(pipe, 3)}
+        else
+          nil
+        end
+      end
+
       def call(pipeline = %Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
         pid = self()
         ref = Process.monitor(out_name)
