@@ -3,15 +3,19 @@ defmodule Flowex.Pipeline do
 
   defstruct module: nil, in_name: nil, out_name: nil, sup_pid: nil
 
-  defmacro pipe(atom, count \\ 1) do
+  defmacro pipe(atom, options \\ [opts: [], count: 1]) do
+    count = options[:count] || 1
+    opts = options[:opts] || []
     quote do
-      @pipes {unquote(atom), unquote(count), :pipe}
+      @pipes {unquote(atom), unquote(count), unquote(opts), :pipe}
     end
   end
 
-  defmacro error_pipe(atom, count \\ 1) do
+  defmacro error_pipe(atom, options \\ [opts: [], count: 1]) do
+    count = options[:count] || 1
+    opts = options[:opts] || []
     quote do
-      @error_pipe {unquote(atom), unquote(count), :error_pipe}
+      @error_pipe {unquote(atom), unquote(count), unquote(opts), :error_pipe}
     end
   end
 
@@ -22,11 +26,16 @@ defmodule Flowex.Pipeline do
 
       Module.register_attribute __MODULE__, :pipes, accumulate: true
       Module.register_attribute __MODULE__, :error_pipe, accumulate: false
-      @error_pipe {:handle_error, 1, :error_pipe}
+      @error_pipe {:handle_error, 1, [], :error_pipe}
 
       @before_compile Flowex.Pipeline
 
+      def init(opts), do: opts
+
+      defoverridable [init: 1]
+
       def start(opts \\ %{}) do
+        opts = init(opts)
         PipelineBuilder.start(__MODULE__, opts)
       end
 

@@ -276,10 +276,10 @@ Flowex has a solution! One can define a number of execution processes for each c
 defmodule FunPipeline do
   use Flowex.Pipeline
 
-  pipe :add_one, 1
-  pipe :mult_by_two, 3
-  pipe :minus_three, 2
-  error_pipe :if_error, 2
+  pipe :add_one, count: 1
+  pipe :mult_by_two, count: 3
+  pipe :minus_three, count: 2
+  error_pipe :if_error, count: 2
 
   # ...
 end
@@ -297,10 +297,10 @@ defmodule ModulePipeline do
 
   defstruct [:number, :a, :b, :c]
 
-  pipe AddOne, 1
-  pipe MultByTwo, 3
-  pipe MinusThree, 2
-  error_pipe IfError, 2
+  pipe AddOne, count: 1
+  pipe MultByTwo, count: 3
+  pipe MinusThree, count: 2
+  error_pipe IfError, count: 2
 end
 
 #pipes

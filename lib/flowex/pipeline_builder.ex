@@ -43,7 +43,8 @@ defmodule Flowex.PipelineBuilder do
 
   defp init_pipes(producer_name, {sup_pid, pipeline_module, opts}) do
     (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
-    |> Enum.reduce([producer_name], fn({atom, count, type}, prev_pids) ->
+    |> Enum.reduce([producer_name], fn({atom, count, pipe_opts, type}, prev_pids) ->
+      opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
       Enum.map((1..count), fn(_i) ->
         init_pipe({sup_pid, pipeline_module, opts}, {atom, type}, prev_pids)
       end)

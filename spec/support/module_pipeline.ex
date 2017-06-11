@@ -3,11 +3,11 @@ defmodule ModulePipeline do
 
   defstruct [:number, :a, :b, :c]
 
-  pipe AddOne, 1
-  pipe MultByTwo, 3
-  pipe :do_nothing, 2
-  pipe MinusThree, 2
-  error_pipe IfError, 3
+  pipe AddOne, count: 1
+  pipe MultByTwo, count: 3
+  pipe :do_nothing, count: 2
+  pipe MinusThree, count: 2
+  error_pipe IfError, count: 3
 
   def do_nothing(struct, _opts) do
     struct
