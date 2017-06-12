@@ -24,6 +24,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Run the pipeline](#run-the-pipeline)
 - [How it works](#how-it-works)
 - [Error handling](#error-handling)
+- [Pipeline and pipe options](#pipeline-and-pipe-options)
 - [Synchronous and asynchronous calls](#synchronous-and-asynchronous-calls)
 - [Bottlenecks](#bottlenecks)
 - [Module pipes](#module-pipes)
@@ -135,6 +136,7 @@ We also renamed the module to `FunPipeline` because we are going to create "Flow
 - `start`, `supervised_start` and `stop` functions to create and destroy pipelines;
 - `call` function to run pipeline computations synchronously.
 - `cast` function to run pipeline computations asynchronously.
+- overridable `init` function which, by default, accepts `opts` and return them
 
 Let's start a pipeline:
 ```elixir
@@ -256,6 +258,51 @@ The first argument is a `%Flowex.PipeError{}` structure which has the following 
 - `:message` - error message;
 - `:pipe` - is `{module, function, opts}` tuple containing info about the pipe where error occured;
 - `:struct` - the input of the pipe.
+
+## Pipeline and pipe options
+In addition to specifying options when starting pipeline one can pass component's options to the `pipe` macro.
+And remember about pipeline's `init` function which can add or override options.
+The flow is the following:
+The options passed to `start` function are available in pipeline `init` function. The function can merge additional options. Then `opts` passed to `pipe` macro are merged.
+So there are three levels that options pass before appearing in component:
+- pipeline `start` function;
+- pipeline `init` function;
+- pipe `opts`.
+
+Let's consider an example:
+```elixir
+defmodule InitOptsFunPipeline do
+  use Flowex.Pipeline
+
+  defstruct [:from_start, :from_init, :from_opts]
+  pipe :component, opts: %{from_opts: 3}
+
+  def init(opts) do
+    # opts passed to start function is available here
+    Map.put(opts, :from_init, 2)
+   end
+
+  def component(_data, opts) do
+    # here all the options is available
+    opts
+  end
+end
+```
+Suppose we've started the pipeline with options `%{from_start: 1}`. 
+`init` function adds `:from_init` option. Then `:from_opts` are merged.
+
+The test below illustrates what is going on:
+```elixir
+describe "function pipeline" do
+  let :pipeline, do: InitOptsFunPipeline.start(%{from_start: 1})
+  let :result, do: InitOptsFunPipeline.call(pipeline(), %InitOptsFunPipeline{})
+
+  it "returns values from different init functions" do
+    expect(result())
+    |> to(eq %InitOptsFunPipeline{from_start: 1, from_init: 2, from_opts: 3})
+  end
+end
+```
 
 ## Synchronous and asynchronous calls
 Note, that `call` function on pipeline module or `Flowex.Client` is synchronous. While communication inside the pipeline is asynchronous:
