@@ -17,7 +17,7 @@ defmodule FunPipelineClientSpec do
       end
     end
 
-    describe ".run" do
+    describe ".call" do
       let_ok :client_pid, do: Flowex.Client.start(pipeline())
       let :result, do: Flowex.Client.call(client_pid(), %FunPipeline{number: 2})
 
@@ -61,7 +61,7 @@ defmodule FunPipelineClientSpec do
       end
     end
 
-    describe ".run!" do
+    describe ".call!" do
       let! :result, do: Flowex.Client.call!(pipeline(), %FunPipeline{number: 2})
 
       it do: assert result().number ==  3
