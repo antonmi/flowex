@@ -9,10 +9,7 @@ defmodule Flowex.Supervisor do
 
   def init(pipeline_module) do
     name = String.to_atom("Flowex.Producer_#{inspect pipeline_module}_#{inspect make_ref()}")
-    children = [
-      worker(Flowex.Producer, [nil, [name: name]], id: name)
-    ]
-
+    children = [worker(Flowex.Producer, [nil, [name: name]], id: name)]
     supervise(children, strategy: :rest_for_one)
   end
 end

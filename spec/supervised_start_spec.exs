@@ -31,4 +31,12 @@ defmodule SupervisedStartSpec do
       end)
     end
   end
+
+  context "sync piplines" do
+    let :opts, do: %{a: :a, b: :b, c: :c}
+    let :pipeline, do: FunPipelineSync.supervised_start(supervisor_pid(), opts())
+    let :output, do: FunPipelineSync.call(pipeline(), %FunPipelineSync{number: 2})
+
+    it do: assert output().number == 3
+  end
 end
