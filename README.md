@@ -509,7 +509,7 @@ end
 
 You can find the examples in ['Start-Flowex'](https://github.com/antonmi/Start-Flowex) project
 
-## Debugging with Sync.Pipeline
+## Debugging with Flowex.Sync.Pipeline
 If you are faced with some error that is hard to debug or error that causes GenServers to crush, you may find useful `Flowex.Sync.Pipeline` module.
 Adding one `Sync` word will completely change the behavior.
 ```elixir
