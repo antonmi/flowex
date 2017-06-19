@@ -30,6 +30,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Module pipes](#module-pipes)
 - [Data available in pipes](#data-available-in-pipes)
 - [Starting strategies](#starting-strategies)
+- [Debugging with Flowex.Sync.Pipeline](#debugging-with-flowex.sync.pipeline)
 - [Contributing](#contributing)
 
 ## Installation
@@ -507,6 +508,20 @@ end
 ```
 
 You can find the examples in ['Start-Flowex'](https://github.com/antonmi/Start-Flowex) project
+
+## Debugging with Sync.Pipeline
+If you are faced with some error that is hard to debug or error that causes GenServers to crush, you may find useful `Flowex.Sync.Pipeline` module.
+Adding one `Sync` word will completely change the behavior.
+```elixir
+defmodule FunPipeline do
+  use Flowex.Sync.Pipeline
+  # The same code as before
+  # ...
+end  
+```
+Interface remains the same but all the code will be evaluated in one simple GenServer. 
+So all you pipes will be evaluated synchronously in separate process.
+Use this option only for debug purposes.
 
 ## Contributing
 #### Contributions are welcome and appreciated!

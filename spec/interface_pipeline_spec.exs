@@ -1,5 +1,5 @@
 defmodule InterfacePipelineSpec do
-  use ESpec
+  use ESpec, async: true
 
   let :pipeline, do: described_module().start()
   let :result, do: described_module().call(pipeline(), %InterfacePipeline{x: 1, y: 2, ok: :ok})

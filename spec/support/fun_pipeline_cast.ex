@@ -22,5 +22,6 @@ defmodule FunPipelineCast do
 
   def print_result(%{number: number, pid: pid}, _opts) do
     send(pid, number)
+    %{number: number}
   end
 end
