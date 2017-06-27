@@ -74,7 +74,10 @@ defmodule Flowex.Pipeline do
         ip = %Flowex.IP{struct: Map.delete(struct, :__struct__), requester: pid}
 
         GenServer.cast(out_name, {in_name, ip})
+        wait_response(pid, ref, pipeline)
+      end
 
+      defp wait_response(pid, ref, pipeline) do
         receive do
           %Flowex.IP{requester: ^pid} = ip ->
             Process.demonitor(ref)
@@ -82,8 +85,7 @@ defmodule Flowex.Pipeline do
           {:DOWN, ^ref, _, _, reason} ->
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
           smth ->
-            reason = "Expected %Flowex.IP{}, received #{inspect smth}"
-            raise Flowex.PipelineError, pipeline: pipeline, message: reason
+            wait_response(pid, ref, pipeline)
         end
       end
 
