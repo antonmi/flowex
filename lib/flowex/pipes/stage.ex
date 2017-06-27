@@ -39,7 +39,8 @@ defmodule Flowex.Stage do
       %{ip | struct: ip_struct}
   rescue
       error ->
-        %{ip | error: %Flowex.PipeError{message: Exception.message(error),
+        %{ip | error: %Flowex.PipeError{error: error,
+                                        message: Exception.message(error),
                                         pipe: {module, function, opts},
                                         struct: ip.struct}}
   end

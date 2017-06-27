@@ -10,7 +10,7 @@ defmodule WithErrorPipeSpec do
     pipe :three
     error_pipe :if_error
 
-    def one(_struct, _opts), do: raise "error"
+    def one(_struct, _opts), do: raise(ArithmeticError, "error")
     def two(struct, _opts), do: struct
     def three(struct, _opts), do: struct
 
@@ -27,6 +27,7 @@ defmodule WithErrorPipeSpec do
   it "return struct with error" do
     expect(result().__struct__).to eq(Pipeline)
     expect(result().error.__struct__).to eq(Flowex.PipeError)
+    expect(result().error.error).to eq(%ArithmeticError{message: "error"})
   end
 
   context "checks error" do

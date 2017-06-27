@@ -3,5 +3,5 @@ defmodule Flowex.PipelineError do
 end
 
 defmodule Flowex.PipeError do
-  defexception message: nil, pipe: nil, struct: nil
+  defexception error: nil, message: nil, pipe: nil, struct: nil
 end
