@@ -50,6 +50,8 @@ defmodule Flowex.Pipeline do
       def handle_error(error, _struct, _opts) do
         raise error
       end
+
+      defoverridable [handle_error: 3]
     end
   end
 
