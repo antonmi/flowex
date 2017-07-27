@@ -164,7 +164,7 @@ The `start` function returns a `%Flowex.Pipeline{}` struct with the following fi
 - module - the name of the module
 - in_name - unique name of 'producer';
 - out_name - unique name of 'consumer';
-- sup_pid - pid of the pipeline supervisor
+- sup_name - unique name of the pipeline supervisor
 
 Note, we have passed options to `start` function. This options will be passed to each function of the pipeline as a second argument.
 There is `supervised_start` function which allows to place pipeline's under external supervisor.

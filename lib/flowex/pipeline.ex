@@ -1,7 +1,7 @@
 defmodule Flowex.Pipeline do
   @moduledoc "Defines macros for pipeline creating"
 
-  defstruct module: nil, in_name: nil, out_name: nil, sup_pid: nil
+  defstruct module: nil, in_name: nil, out_name: nil, sup_name: nil
 
   defmacro pipe(atom, options \\ [opts: [], count: 1]) do
     count = options[:count] || 1
@@ -43,8 +43,8 @@ defmodule Flowex.Pipeline do
         PipelineBuilder.supervised_start(__MODULE__, pid, opts)
       end
 
-      def stop(%Flowex.Pipeline{sup_pid: sup_pid}) do
-        PipelineBuilder.stop(sup_pid)
+      def stop(%Flowex.Pipeline{sup_name: sup_name}) do
+        PipelineBuilder.stop(sup_name)
       end
 
       def handle_error(error, _struct, _opts) do

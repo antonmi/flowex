@@ -7,9 +7,9 @@ defmodule Flowex.PipelineBuilder do
     {producer_name, consumer_name, all_specs} = build_children(pipeline_module, opts)
 
     sup_name = supervisor_name(pipeline_module)
-    {:ok, sup_pid} = Flowex.Supervisor.start_link(all_specs, sup_name)
+    {:ok, _sup_pid} = Flowex.Supervisor.start_link(all_specs, sup_name)
 
-    pipeline_struct(pipeline_module, producer_name, consumer_name, sup_pid)
+    pipeline_struct(pipeline_module, producer_name, consumer_name, sup_name)
   end
 
   def supervised_start(pipeline_module, pid, opts) do
@@ -17,15 +17,15 @@ defmodule Flowex.PipelineBuilder do
 
     sup_name = supervisor_name(pipeline_module)
     sup_spec = supervisor(Flowex.Supervisor, [all_specs, sup_name], [id: sup_name, restart: :permanent])
-    {:ok, sup_pid} = Supervisor.start_child(pid, sup_spec)
-    pipeline_struct(pipeline_module, producer_name, consumer_name, sup_pid)
+    {:ok, _sup_pid} = Supervisor.start_child(pid, sup_spec)
+    pipeline_struct(pipeline_module, producer_name, consumer_name, sup_name)
   end
 
-  def stop(sup_pid) do
-    Enum.each(Supervisor.which_children(sup_pid), fn({id, _pid, :worker, [_]}) ->
-      Supervisor.terminate_child(sup_pid, id)
+  def stop(sup_name) do
+    Enum.each(Supervisor.which_children(sup_name), fn({id, _pid, :worker, [_]}) ->
+      Supervisor.terminate_child(sup_name, id)
     end)
-    Supervisor.stop(sup_pid)
+    Supervisor.stop(sup_name)
   end
 
   defp build_children(pipeline_module, opts) do
@@ -52,9 +52,9 @@ defmodule Flowex.PipelineBuilder do
     String.to_atom("Flowex.Consumer_#{inspect pipeline_module}_#{inspect make_ref()}")
   end
 
-  defp pipeline_struct(pipeline_module, producer_name, consumer_name, sup_pid) do
+  defp pipeline_struct(pipeline_module, producer_name, consumer_name, sup_name) do
     %Flowex.Pipeline{module: pipeline_module, in_name: producer_name,
-                     out_name: consumer_name, sup_pid: sup_pid}
+                     out_name: consumer_name, sup_name: sup_name}
   end
 
   defp init_pipes({producer_spec, producer_name}, {pipeline_module, opts}) do

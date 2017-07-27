@@ -19,7 +19,12 @@ defmodule SupervisedStartSpec do
   end
 
   context "check supervisors" do
-    let! :pipeline_sup_pids, do: [pipeline1().sup_pid(), pipeline2().sup_pid()]
+    let! :pipeline_sup_pids do
+      [
+        Process.whereis(pipeline1().sup_name()),
+        Process.whereis(pipeline2().sup_name())
+      ]
+    end
 
     it "check supervisors" do
       Supervisor.which_children(supervisor_pid())

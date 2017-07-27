@@ -16,27 +16,34 @@ defmodule Flowex.Sync.Pipeline do
 
       def start(opts \\ %{}) do
         opts = init(opts)
-        {:ok, sup_pid} = Flowex.Sync.Supervisor.start_link(__MODULE__, opts)
-        do_start(sup_pid)
+        name = supervisor_name()
+        {:ok, sup_pid} = Flowex.Sync.Supervisor.start_link(__MODULE__, name, opts)
+        do_start(sup_pid, name)
       end
 
-      def stop(%Flowex.Pipeline{sup_pid: sup_pid}) do
-        Enum.each(Supervisor.which_children(sup_pid), fn({id, _pid, :worker, [_]}) ->
-          Supervisor.terminate_child(sup_pid, id)
+      def stop(%Flowex.Pipeline{sup_name: sup_name}) do
+        Enum.each(Supervisor.which_children(sup_name), fn({id, _pid, :worker, [_]}) ->
+          Supervisor.terminate_child(sup_name, id)
         end)
-        Supervisor.stop(sup_pid)
+        Supervisor.stop(sup_name)
       end
 
       def supervised_start(pid, opts \\ %{}) do
         import Supervisor.Spec
-        sup_spec = supervisor(Flowex.Sync.Supervisor, [__MODULE__, opts], [id: "Flowex.Sync_#{inspect __MODULE__}_#{inspect make_ref()}", restart: :permanent])
+        name = supervisor_name()
+        sup_spec = supervisor(Flowex.Sync.Supervisor, [__MODULE__, name, opts],
+                              [id: name, restart: :permanent])
         {:ok, sup_pid} = Supervisor.start_child(pid, sup_spec)
-         do_start(sup_pid)
+        do_start(sup_pid, name)
       end
 
-      defp do_start(sup_pid) do
+      defp do_start(sup_pid, name) do
         [{gen_server_name, _prod, :worker, [Flowex.Sync.GenServer]}] = Supervisor.which_children(sup_pid)
-        %Flowex.Pipeline{in_name: gen_server_name, module: __MODULE__, out_name: gen_server_name, sup_pid: sup_pid}
+        %Flowex.Pipeline{in_name: gen_server_name, module: __MODULE__, out_name: gen_server_name, sup_name: name}
+      end
+
+      defp supervisor_name do
+        String.to_atom("Flowex.Sync.Supervisor_#{inspect __MODULE__}_#{inspect make_ref()}")
       end
 
       def handle_error(error, _struct, _opts) do

@@ -56,15 +56,16 @@ defmodule UnhandledErrorSpec do
       {:shared, pipeline: pipeline}
     end
 
-    let :old_pid, do: Process.whereis(shared.pipeline.sup_pid)
+    let! :old_pid, do: Process.whereis(shared.pipeline.sup_name)
 
     before do
-      Process.exit(shared.pipeline.sup_pid, :kill)
+      pid = Process.whereis(shared.pipeline.sup_name)
+      Process.exit(pid, :kill)
       Process.sleep(200)
     end
 
     it "kills supervisor" do
-      expect(Process.alive?(shared.pipeline.sup_pid)).to be false
+      expect(Process.alive?(old_pid)).to be false
     end
 
     it "restarts successfully" do

@@ -9,13 +9,13 @@ defmodule FunPipelineSpec do
       expect(pipeline().module) |> to(eq FunPipeline)
       expect(pipeline().in_name) |> to(be_atom())
       expect(pipeline().out_name) |> to(be_atom())
-      expect(pipeline().sup_pid) |> to(be_pid())
+      expect(pipeline().sup_name) |> to(be_atom())
     end
   end
 
   describe ".stop" do
     let! :pipeline, do: FunPipeline.start
-    let :sup_pid, do: pipeline().sup_pid
+    let :sup_pid, do: Process.whereis(pipeline().sup_name)
     let! :pipe_pids do
       Supervisor.which_children(sup_pid()) |> Enum.map(fn({_id, pid, :worker, [_]}) -> pid end)
     end
