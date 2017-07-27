@@ -21,9 +21,9 @@ defmodule Flowex.Mixfile do
 
   defp deps do
     [
-      {:gen_stage, "0.12.0"},
-      {:espec, "~> 1.4.0", only: :test},
-      {:credo, "0.7.2", only: [:dev, :test]},
+      {:gen_stage, "0.12.1"},
+      {:espec, "~> 1.4.2", only: :test},
+      {:credo, "0.8.4", only: [:dev, :test]},
       # Docs
       {:earmark, "~> 1.0.3", only: [:docs, :dev]},
       {:ex_doc, "~> 0.14.3", only: [:docs, :dev]}

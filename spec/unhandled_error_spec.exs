@@ -48,4 +48,27 @@ defmodule UnhandledErrorSpec do
       expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
     end
   end
+
+  context "supervisor crash" do
+    before do
+      {:ok, supervisor_pid} = Supervisor.start_link([], strategy: :one_for_one)
+      pipeline = Pipeline.supervised_start(supervisor_pid)
+      {:shared, pipeline: pipeline}
+    end
+
+    let :old_pid, do: Process.whereis(shared.pipeline.sup_pid)
+
+    before do
+      Process.exit(shared.pipeline.sup_pid, :kill)
+      Process.sleep(200)
+    end
+
+    it "kills supervisor" do
+      expect(Process.alive?(shared.pipeline.sup_pid)).to be false
+    end
+
+    it "restarts successfully" do
+      expect(Pipeline.call(shared.pipeline ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
+    end
+  end
 end
