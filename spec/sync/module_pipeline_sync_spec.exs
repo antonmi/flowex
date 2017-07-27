@@ -11,13 +11,13 @@ defmodule ModulePipelineSyncSpec do
       expect(pipeline().module) |> to(eq ModulePipelineSync)
       expect(pipeline().in_name) |> to(be_atom())
       expect(pipeline().out_name) |> to(be_atom())
-      expect(pipeline().sup_pid) |> to(be_pid())
+      expect(pipeline().sup_name) |> to(be_atom())
     end
   end
 
   describe ".stop" do
     let! :pipeline, do: ModulePipelineSync.start(opts())
-    let! :sup_pid, do: pipeline().sup_pid
+    let! :sup_pid, do: Process.whereis(pipeline().sup_name)
 
     it "stops supervisor" do
       assert Process.alive?(sup_pid())

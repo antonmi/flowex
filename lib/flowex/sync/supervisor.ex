@@ -3,8 +3,8 @@ defmodule Flowex.Sync.Supervisor do
 
   use Supervisor
 
-  def start_link(pipeline_module, opts) do
-    Supervisor.start_link(__MODULE__, [pipeline_module, opts])
+  def start_link(pipeline_module, name, opts) do
+    Supervisor.start_link(__MODULE__, [pipeline_module, opts], name: name)
   end
 
   def init([pipeline_module, opts]) do
