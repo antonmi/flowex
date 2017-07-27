@@ -78,18 +78,19 @@ defmodule Flowex.PipelineBuilder do
 
   defp init_function_pipe({type, pipeline_module, function, opts}, prev_names) do
     name = String.to_atom("Flowex_#{pipeline_module}.#{function}_#{inspect make_ref()}")
-    worker_spec = worker(Flowex.Stage,
-                         [{type, pipeline_module, function, opts, prev_names}, [name: name]],
-                         [id: name])
+    opts = %Flowex.StageOpts{type: type, module: pipeline_module, function: function,
+                             opts: opts, name: name, producer_names: prev_names}
+    worker_spec = worker(Flowex.Stage, [opts, [name: name]], [id: name])
     {worker_spec, name}
   end
 
   defp init_module_pipe({type, module, opts}, prev_names) do
     opts = module.init(opts)
     name = String.to_atom("Flowex_#{module}.call_#{inspect make_ref()}")
-    worker_spec = worker(Flowex.Stage,
-                         [{type, module, :call, opts, prev_names}, [name: name]],
-                         [id: name])
+    opts = %Flowex.StageOpts{type: type, module: module, function: :call,
+                             opts: opts, name: name, producer_names: prev_names}
+
+    worker_spec = worker(Flowex.Stage, [opts, [name: name]], [id: name])
     {worker_spec, name}
   end
 end

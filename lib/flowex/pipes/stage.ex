@@ -7,28 +7,28 @@ defmodule Flowex.Stage do
     GenStage.start_link(__MODULE__, state, opts)
   end
 
-  def init({type, module, function, opts, subscribe_to}) do
-    subscribe_to = Enum.map(subscribe_to, &({&1,  max_demand: 1}))
-    {:producer_consumer, {type, module, function, opts}, subscribe_to: subscribe_to}
+  def init(opts) do
+    subscribe_to_with_opts = Enum.map(opts.producer_names, &({&1,  max_demand: 1}))
+    {:producer_consumer, opts, subscribe_to: subscribe_to_with_opts}
   end
 
-  def handle_events([ip], _from, {:pipe, module, function, opts}) do
+  def handle_events([ip], _from, state = %Flowex.StageOpts{type: :pipe}) do
     if ip.error do
-      {:noreply, [ip], {:pipe, module, function, opts}}
+      {:noreply, [ip], state}
     else
-      new_ip = try_apply(ip, {module, function, opts})
-      {:noreply, [new_ip], {:pipe, module, function, opts}}
+      new_ip = try_apply(ip, {state.module, state.function, state.opts})
+      {:noreply, [new_ip], state}
     end
   end
 
-  def handle_events([ip], _from, {:error_pipe, module, function, opts}) do
+  def handle_events([ip], _from, state = %Flowex.StageOpts{type: :error_pipe}) do
     if ip.error do
-      struct = struct(module.__struct__, ip.struct)
-      result = apply(module, function, [ip.error, struct, opts])
+      struct = struct(state.module.__struct__, ip.struct)
+      result = apply(state.module, state.function, [ip.error, struct, state.opts])
       ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
-      {:noreply, [%{ip | struct: ip_struct}], {:error_pipe, module, function, opts}}
+      {:noreply, [%{ip | struct: ip_struct}], state}
     else
-      {:noreply, [ip], {:error_pipe, module, function, opts}}
+      {:noreply, [ip], state}
     end
   end
 
