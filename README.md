@@ -16,6 +16,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Flow-Based REST API with Flowex and Plug](https://medium.com/@anton.mishchuk/flow-based-rest-api-with-flowex-and-plug-323d6920f166) - post on medium.com
 - [Multi language FBP with Flowex](https://www.slideshare.net/pivorak/multi-language-fbp-with-flowex-by-anton-mishchuk?qid=acfe02be-c264-4886-90b5-3cba4edf77ef&v=&b=&from_search=16) - presentation
 - [Multi-language Flowex components](https://medium.com/@anton.mishchuk/multi-language-flowex-components-fdda11d34744) - post on medium.com
+- [Flow-Based REST API with Flowex and Plug](https://medium.com/@anton.mishchuk/flow-based-rest-api-with-flowex-and-plug-323d6920f166)
 
 ## Contents
 - [Installation](#installation)
