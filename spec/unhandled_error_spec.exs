@@ -65,7 +65,7 @@ defmodule UnhandledErrorSpec do
     end
 
     it "kills supervisor" do
-      expect(Process.alive?(old_pid)).to be false
+      expect(Process.alive?(old_pid())).to be false
     end
 
     it "restarts successfully" do

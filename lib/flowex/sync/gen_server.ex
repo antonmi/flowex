@@ -44,7 +44,7 @@ defmodule Flowex.Sync.GenServer do
 
   defp do_process(ip, pipeline_module, atom, {opts, pipe_opts}) do
     pipe_opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
-    case Atom.to_char_list(atom) do
+    case Atom.to_charlist(atom) do
       ~c"Elixir." ++ _ ->
         pipe_opts = atom.init(pipe_opts)
         try_apply(ip, {atom, :call, pipe_opts})
@@ -54,7 +54,7 @@ defmodule Flowex.Sync.GenServer do
 
   defp do_preocess_error(ip, pipeline_module, atom, {opts, pipe_opts}, :error_pipe) do
     pipe_opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
-    result = case Atom.to_char_list(atom) do
+    result = case Atom.to_charlist(atom) do
       ~c"Elixir." ++ _ ->
         pipe_opts = atom.init(pipe_opts)
         apply(atom, :call, [ip.error, ip.struct, pipe_opts])

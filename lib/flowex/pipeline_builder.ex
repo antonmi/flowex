@@ -70,7 +70,7 @@ defmodule Flowex.PipelineBuilder do
   end
 
   def init_pipe({pipeline_module, opts}, {atom, type}, prev_names) do
-    case Atom.to_char_list(atom) do
+    case Atom.to_charlist(atom) do
       ~c"Elixir." ++ _ -> init_module_pipe({type, atom, opts}, prev_names)
       _ -> init_function_pipe({type, pipeline_module, atom, opts}, prev_names)
     end
