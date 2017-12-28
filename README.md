@@ -32,7 +32,7 @@ Flowex DSL allows you to easily create "pipelines" of Elixir GenStages.
 - [Module pipes](#module-pipes)
 - [Data available in pipes](#data-available-in-pipes)
 - [Starting strategies](#starting-strategies)
-- [Debugging with Flowex.Sync.Pipeline](#debugging-with-flowex.sync.pipeline)
+- [Debugging with Flowex.Sync.Pipeline](#debugging-with-flowexsyncpipeline)
 - [Contributing](#contributing)
 
 ## Installation
