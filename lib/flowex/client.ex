@@ -3,8 +3,8 @@ defmodule Flowex.Client do
 
   use GenServer
 
-  def start(pipeline) do
-    GenServer.start_link(__MODULE__, pipeline)
+  def start(pipeline, opts \\ []) do
+    GenServer.start_link(__MODULE__, pipeline, opts)
   end
 
   def stop(pid) do
