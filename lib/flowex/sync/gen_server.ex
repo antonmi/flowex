@@ -5,6 +5,10 @@ defmodule Flowex.Sync.GenServer do
     GenServer.start_link(__MODULE__, state, opts)
   end
 
+  def init(opts) do
+    {:ok, opts}
+  end
+
   def handle_call(ip, _from, {pipeline_module, opts}) do
     result = do_call(ip, {pipeline_module, opts})
     {:reply, result, {pipeline_module, opts}}
