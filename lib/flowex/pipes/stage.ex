@@ -33,15 +33,15 @@ defmodule Flowex.Stage do
   end
 
   defp try_apply(ip, {module, function, opts}) do
-      struct = struct(module.__struct__, ip.struct)
-      result = apply(module, function, [struct, opts])
-      ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
+    struct = struct(module.__struct__, ip.struct)
+    result = apply(module, function, [struct, opts])
+    ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
       %{ip | struct: ip_struct}
   rescue
-      error ->
-        %{ip | error: %Flowex.PipeError{error: error,
-                                        message: Exception.message(error),
-                                        pipe: {module, function, opts},
-                                        struct: ip.struct}}
+    error ->
+      %{ip | error: %Flowex.PipeError{error: error,
+                                      message: Exception.message(error),
+                                      pipe: {module, function, opts},
+                                      struct: ip.struct}}
   end
 end
