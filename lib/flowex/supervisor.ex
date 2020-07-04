@@ -1,5 +1,5 @@
 defmodule Flowex.Supervisor do
-  @moduledoc "Pipeline supevisor"
+  @moduledoc "Pipeline supervisor"
 
   use Supervisor
 

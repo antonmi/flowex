@@ -21,24 +21,28 @@ defmodule Flowex.Sync.GenServer do
 
   defp do_call(ip, {pipeline_module, opts}) do
     (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
-    |> Enum.reduce(ip, fn(pipe, ip) ->
+    |> Enum.reduce(ip, fn pipe, ip ->
       process(pipe, ip, pipeline_module, opts)
     end)
   end
 
   defp try_apply(ip, {module, function, pipe_opts}) do
-      result = apply(module, function, [ip.struct, pipe_opts])
-      %{ip | struct: Map.merge(ip.struct, Map.delete(result, :__struct__))}
+    result = apply(module, function, [ip.struct, pipe_opts])
+    %{ip | struct: Map.merge(ip.struct, Map.delete(result, :__struct__))}
   rescue
-      error ->
-        error_struct = %Flowex.PipeError{message: Exception.message(error),
-                                        pipe: {module, function, pipe_opts},
-                                        struct: ip.struct}
-        %{ip | error: error_struct}
+    error ->
+      error_struct = %Flowex.PipeError{
+        message: Exception.message(error),
+        pipe: {module, function, pipe_opts},
+        struct: ip.struct
+      }
+
+      %{ip | error: error_struct}
   end
 
   defp process(pipe, ip, pipeline_module, opts) do
     {atom, _count, pipe_opts, type} = pipe
+
     if ip.error do
       do_preocess_error(ip, pipeline_module, atom, {opts, pipe_opts}, type)
     else
@@ -48,22 +52,30 @@ defmodule Flowex.Sync.GenServer do
 
   defp do_process(ip, pipeline_module, atom, {opts, pipe_opts}) do
     pipe_opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
+
     case Atom.to_charlist(atom) do
       ~c"Elixir." ++ _ ->
         pipe_opts = atom.init(pipe_opts)
         try_apply(ip, {atom, :call, pipe_opts})
-      _ -> try_apply(ip, {pipeline_module, atom, pipe_opts})
+
+      _ ->
+        try_apply(ip, {pipeline_module, atom, pipe_opts})
     end
   end
 
   defp do_preocess_error(ip, pipeline_module, atom, {opts, pipe_opts}, :error_pipe) do
     pipe_opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
-    result = case Atom.to_charlist(atom) do
-      ~c"Elixir." ++ _ ->
-        pipe_opts = atom.init(pipe_opts)
-        apply(atom, :call, [ip.error, ip.struct, pipe_opts])
-      _ -> apply(pipeline_module, atom, [ip.error, ip.struct, pipe_opts])
-    end
+
+    result =
+      case Atom.to_charlist(atom) do
+        ~c"Elixir." ++ _ ->
+          pipe_opts = atom.init(pipe_opts)
+          apply(atom, :call, [ip.error, ip.struct, pipe_opts])
+
+        _ ->
+          apply(pipeline_module, atom, [ip.error, ip.struct, pipe_opts])
+      end
+
     %{ip | struct: Map.merge(ip.struct, result)}
   end
 

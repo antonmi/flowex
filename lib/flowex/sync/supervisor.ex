@@ -8,10 +8,12 @@ defmodule Flowex.Sync.Supervisor do
   end
 
   def init([pipeline_module, opts]) do
-    name = String.to_atom("Flowex.Sync_#{inspect pipeline_module}_#{inspect make_ref()}")
+    name = String.to_atom("Flowex.Sync_#{inspect(pipeline_module)}_#{inspect(make_ref())}")
+
     children = [
       worker(Flowex.Sync.GenServer, [{pipeline_module, opts}, [name: name]], id: name)
     ]
+
     supervise(children, strategy: :one_for_one)
   end
 end

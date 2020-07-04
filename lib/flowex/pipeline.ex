@@ -6,6 +6,7 @@ defmodule Flowex.Pipeline do
   defmacro pipe(atom, options \\ [opts: [], count: 1]) do
     count = options[:count] || 1
     opts = options[:opts] || []
+
     quote do
       @pipes {unquote(atom), unquote(count), unquote(opts), :pipe}
     end
@@ -14,6 +15,7 @@ defmodule Flowex.Pipeline do
   defmacro error_pipe(atom, options \\ [opts: [], count: 1]) do
     count = options[:count] || 1
     opts = options[:opts] || []
+
     quote do
       @error_pipe {unquote(atom), unquote(count), unquote(opts), :error_pipe}
     end
@@ -24,15 +26,15 @@ defmodule Flowex.Pipeline do
       import Flowex.Pipeline
       alias Flowex.PipelineBuilder
 
-      Module.register_attribute __MODULE__, :pipes, accumulate: true
-      Module.register_attribute __MODULE__, :error_pipe, accumulate: false
+      Module.register_attribute(__MODULE__, :pipes, accumulate: true)
+      Module.register_attribute(__MODULE__, :error_pipe, accumulate: false)
       @error_pipe {:handle_error, 1, [], :error_pipe}
 
       @before_compile Flowex.Pipeline
 
       def init(opts), do: opts
 
-      defoverridable [init: 1]
+      defoverridable init: 1
 
       def start(opts \\ %{}) do
         opts = init(opts)
@@ -51,7 +53,7 @@ defmodule Flowex.Pipeline do
         raise error
       end
 
-      defoverridable [handle_error: 3]
+      defoverridable handle_error: 3
     end
   end
 
@@ -68,7 +70,10 @@ defmodule Flowex.Pipeline do
         end
       end
 
-      def call(pipeline = %Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
+      def call(
+            pipeline = %Flowex.Pipeline{in_name: in_name, out_name: out_name},
+            struct = %__MODULE__{}
+          ) do
         pid = self()
         ref = Process.monitor(out_name)
         ip = %Flowex.IP{struct: Map.delete(struct, :__struct__), requester: pid}
@@ -82,14 +87,19 @@ defmodule Flowex.Pipeline do
           %Flowex.IP{requester: ^pid} = ip ->
             Process.demonitor(ref)
             struct(%__MODULE__{}, ip.struct)
+
           {:DOWN, ^ref, _, _, reason} ->
             raise Flowex.PipelineError, pipeline: pipeline, message: reason
+
           smth ->
             wait_response(pid, ref, pipeline)
         end
       end
 
-      def cast(pipeline = %Flowex.Pipeline{in_name: in_name, out_name: out_name}, struct = %__MODULE__{}) do
+      def cast(
+            pipeline = %Flowex.Pipeline{in_name: in_name, out_name: out_name},
+            struct = %__MODULE__{}
+          ) do
         ip = %Flowex.IP{struct: Map.delete(struct, :__struct__), requester: false}
         GenServer.cast(out_name, {in_name, ip})
       end

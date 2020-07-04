@@ -16,15 +16,19 @@ defmodule Flowex.PipelineBuilder do
     {producer_name, consumer_name, all_specs} = build_children(pipeline_module, opts)
 
     sup_name = supervisor_name(pipeline_module)
-    sup_spec = supervisor(Flowex.Supervisor, [all_specs, sup_name], [id: sup_name, restart: :permanent])
+
+    sup_spec =
+      supervisor(Flowex.Supervisor, [all_specs, sup_name], id: sup_name, restart: :permanent)
+
     {:ok, _sup_pid} = Supervisor.start_child(pid, sup_spec)
     pipeline_struct(pipeline_module, producer_name, consumer_name, sup_name)
   end
 
   def stop(sup_name) do
-    Enum.each(Supervisor.which_children(sup_name), fn({id, _pid, :worker, [_]}) ->
+    Enum.each(Supervisor.which_children(sup_name), fn {id, _pid, :worker, [_]} ->
       Supervisor.terminate_child(sup_name, id)
     end)
+
     Supervisor.stop(sup_name)
   end
 
@@ -35,37 +39,47 @@ defmodule Flowex.PipelineBuilder do
     {wss, last_names} = init_pipes({producer_spec, producer_name}, {pipeline_module, opts})
 
     consumer_name = consumer_name(pipeline_module)
-    consumer_worker_spec = worker(Flowex.Consumer, [last_names, [name: consumer_name]], [id: consumer_name])
+
+    consumer_worker_spec =
+      worker(Flowex.Consumer, [last_names, [name: consumer_name]], id: consumer_name)
 
     {producer_name, consumer_name, wss ++ [consumer_worker_spec]}
   end
 
   defp supervisor_name(pipeline_module) do
-    String.to_atom("Flowex.Supervisor_#{inspect pipeline_module}_#{inspect make_ref()}")
+    String.to_atom("Flowex.Supervisor_#{inspect(pipeline_module)}_#{inspect(make_ref())}")
   end
 
   defp producer_name(pipeline_module) do
-   String.to_atom("Flowex.Producer_#{inspect pipeline_module}_#{inspect make_ref()}")
+    String.to_atom("Flowex.Producer_#{inspect(pipeline_module)}_#{inspect(make_ref())}")
   end
 
   defp consumer_name(pipeline_module) do
-    String.to_atom("Flowex.Consumer_#{inspect pipeline_module}_#{inspect make_ref()}")
+    String.to_atom("Flowex.Consumer_#{inspect(pipeline_module)}_#{inspect(make_ref())}")
   end
 
   defp pipeline_struct(pipeline_module, producer_name, consumer_name, sup_name) do
-    %Flowex.Pipeline{module: pipeline_module, in_name: producer_name,
-                     out_name: consumer_name, sup_name: sup_name}
+    %Flowex.Pipeline{
+      module: pipeline_module,
+      in_name: producer_name,
+      out_name: consumer_name,
+      sup_name: sup_name
+    }
   end
 
   defp init_pipes({producer_spec, producer_name}, {pipeline_module, opts}) do
     (pipeline_module.pipes() ++ [pipeline_module.error_pipe])
-    |> Enum.reduce({[producer_spec], [producer_name]}, fn({atom, count, pipe_opts, type}, {wss, prev_names}) ->
+    |> Enum.reduce({[producer_spec], [producer_name]}, fn {atom, count, pipe_opts, type},
+                                                          {wss, prev_names} ->
       opts = Map.merge(Enum.into(opts, %{}), Enum.into(pipe_opts, %{}))
-      list = Enum.map((1..count), fn(_i) ->
-        init_pipe({pipeline_module, opts}, {atom, type}, prev_names)
-      end)
+
+      list =
+        Enum.map(1..count, fn _i ->
+          init_pipe({pipeline_module, opts}, {atom, type}, prev_names)
+        end)
+
       {new_wss, names} = Enum.unzip(list)
-      {wss ++ new_wss , names}
+      {wss ++ new_wss, names}
     end)
   end
 
@@ -77,20 +91,35 @@ defmodule Flowex.PipelineBuilder do
   end
 
   defp init_function_pipe({type, pipeline_module, function, opts}, prev_names) do
-    name = String.to_atom("Flowex_#{pipeline_module}.#{function}_#{inspect make_ref()}")
-    opts = %Flowex.StageOpts{type: type, module: pipeline_module, function: function,
-                             opts: opts, name: name, producer_names: prev_names}
-    worker_spec = worker(Flowex.Stage, [opts, [name: name]], [id: name])
+    name = String.to_atom("Flowex_#{pipeline_module}.#{function}_#{inspect(make_ref())}")
+
+    opts = %Flowex.StageOpts{
+      type: type,
+      module: pipeline_module,
+      function: function,
+      opts: opts,
+      name: name,
+      producer_names: prev_names
+    }
+
+    worker_spec = worker(Flowex.Stage, [opts, [name: name]], id: name)
     {worker_spec, name}
   end
 
   defp init_module_pipe({type, module, opts}, prev_names) do
     opts = module.init(opts)
-    name = String.to_atom("Flowex_#{module}.call_#{inspect make_ref()}")
-    opts = %Flowex.StageOpts{type: type, module: module, function: :call,
-                             opts: opts, name: name, producer_names: prev_names}
+    name = String.to_atom("Flowex_#{module}.call_#{inspect(make_ref())}")
 
-    worker_spec = worker(Flowex.Stage, [opts, [name: name]], [id: name])
+    opts = %Flowex.StageOpts{
+      type: type,
+      module: module,
+      function: :call,
+      opts: opts,
+      name: name,
+      producer_names: prev_names
+    }
+
+    worker_spec = worker(Flowex.Stage, [opts, [name: name]], id: name)
     {worker_spec, name}
   end
 end

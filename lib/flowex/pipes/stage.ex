@@ -8,7 +8,7 @@ defmodule Flowex.Stage do
   end
 
   def init(opts) do
-    subscribe_to_with_opts = Enum.map(opts.producer_names, &({&1,  max_demand: 1}))
+    subscribe_to_with_opts = Enum.map(opts.producer_names, &{&1, max_demand: 1})
     {:producer_consumer, opts, subscribe_to: subscribe_to_with_opts}
   end
 
@@ -36,12 +36,17 @@ defmodule Flowex.Stage do
     struct = struct(module.__struct__, ip.struct)
     result = apply(module, function, [struct, opts])
     ip_struct = Map.merge(ip.struct, Map.delete(result, :__struct__))
-      %{ip | struct: ip_struct}
+    %{ip | struct: ip_struct}
   rescue
     error ->
-      %{ip | error: %Flowex.PipeError{error: error,
-                                      message: Exception.message(error),
-                                      pipe: {module, function, opts},
-                                      struct: ip.struct}}
+      %{
+        ip
+        | error: %Flowex.PipeError{
+            error: error,
+            message: Exception.message(error),
+            pipe: {module, function, opts},
+            struct: ip.struct
+          }
+      }
   end
 end

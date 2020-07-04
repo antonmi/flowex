@@ -8,7 +8,7 @@ defmodule Flowex.Consumer do
   end
 
   def init(subscribe_to \\ []) do
-    subscribe_to = Enum.map(subscribe_to, &({&1,  max_demand: 1}))
+    subscribe_to = Enum.map(subscribe_to, &{&1, max_demand: 1})
     {:consumer, nil, subscribe_to: subscribe_to}
   end
 
@@ -16,6 +16,7 @@ defmodule Flowex.Consumer do
     if is_pid(ip.requester) do
       send(ip.requester, ip)
     end
+
     {:noreply, [], nil}
   end
 

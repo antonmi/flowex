@@ -2,16 +2,17 @@ defmodule Flowex.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :flowex,
-     version: "0.5.4",
-     elixir: ">= 1.3.0",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     preferred_cli_env: [espec: :test],
-     deps: deps(),
-     description: description(),
-     package: package(),
-     source_url: "https://github.com/antonmi/flowex"
+    [
+      app: :flowex,
+      version: "0.5.4",
+      elixir: ">= 1.3.0",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      preferred_cli_env: [espec: :test],
+      deps: deps(),
+      description: description(),
+      package: package(),
+      source_url: "https://github.com/antonmi/flowex"
     ]
   end
 
@@ -35,11 +36,11 @@ defmodule Flowex.Mixfile do
   end
 
   defp package do
-   [
-     files: ~w(lib mix.exs README.md),
-     maintainers: ["Anton Mishchuk"],
-     licenses: ["MIT"],
-     links: %{"github" => "https://github.com/antonmi/flowex"}
-   ]
+    [
+      files: ~w(lib mix.exs README.md),
+      maintainers: ["Anton Mishchuk"],
+      licenses: ["MIT"],
+      links: %{"github" => "https://github.com/antonmi/flowex"}
+    ]
   end
 end
