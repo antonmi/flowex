@@ -29,10 +29,10 @@ defmodule SupervisedStartSpec do
     it "check supervisors" do
       Supervisor.which_children(supervisor_pid())
       |> Enum.each(fn({id, pid, type, [module]}) ->
-        expect(Atom.to_string(id)).to start_with("Flowex.Supervisor_")
-        expect(pipeline_sup_pids()).to have(pid)
-        expect(type).to eq(:supervisor)
-        expect(module).to eq(Flowex.Supervisor)
+        expect(Atom.to_string(id)) |> to(start_with("Flowex.Supervisor_"))
+        expect(pipeline_sup_pids()) |> to(have(pid))
+        expect(type) |> to(eq :supervisor)
+        expect(module) |> to(eq Flowex.Supervisor)
       end)
     end
   end

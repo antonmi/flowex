@@ -39,13 +39,13 @@ defmodule UnhandledErrorSpec do
     end
 
     it "raises a Flowex.PipelineError but still works" do
-      expect(func()).to raise_exception(Flowex.PipelineError)
+      expect(func()) |> to(raise_exception(Flowex.PipelineError))
       Process.sleep(100)
-      expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
+      expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})) |> to(eq %Pipeline{data: :ok})
       #one more time
-      expect(func()).to raise_exception(Flowex.PipelineError)
+      expect(func()) |> to(raise_exception(Flowex.PipelineError))
       Process.sleep(100)
-      expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
+      expect(Pipeline.call(pipeline() ,%Pipeline{data: :ok})) |> to(eq %Pipeline{data: :ok})
     end
   end
 
@@ -65,11 +65,11 @@ defmodule UnhandledErrorSpec do
     end
 
     it "kills supervisor" do
-      expect(Process.alive?(old_pid())).to be false
+      expect(Process.alive?(old_pid())) |> to(be false)
     end
 
     it "restarts successfully" do
-      expect(Pipeline.call(shared.pipeline ,%Pipeline{data: :ok})).to eq(%Pipeline{data: :ok})
+      expect(Pipeline.call(shared.pipeline ,%Pipeline{data: :ok})) |> to(eq %Pipeline{data: :ok})
     end
   end
 end

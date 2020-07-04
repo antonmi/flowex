@@ -5,11 +5,11 @@ defmodule FunPipelineSpec do
     let :pipeline, do: FunPipeline.start
 
     it "checks pipeline struct" do
-      expect(pipeline()) |> to(be_struct Flowex.Pipeline)
-      expect(pipeline().module) |> to(eq FunPipeline)
-      expect(pipeline().in_name) |> to(be_atom())
-      expect(pipeline().out_name) |> to(be_atom())
-      expect(pipeline().sup_name) |> to(be_atom())
+      pipeline() |> should(be_struct Flowex.Pipeline)
+      pipeline().module |> should(eq FunPipeline)
+      pipeline().in_name |> should(be_atom())
+      pipeline().out_name |> should(be_atom())
+      pipeline().sup_name |> should(be_atom())
     end
   end
 

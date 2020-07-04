@@ -46,23 +46,23 @@ defmodule ModulePipelineSyncSpec do
     end
 
     it "return struct with error" do
-      expect(output().__struct__).to eq(ModulePipelineSync)
-      expect(output().number.__struct__).to eq(Flowex.PipeError)
+      expect(output().__struct__) |> to(eq ModulePipelineSync)
+      expect(output().number.__struct__) |> to(eq Flowex.PipeError)
     end
 
     context "checks error" do
       let :error, do: output().number
 
       it "has message" do
-        expect(error().message).to eq("bad argument in arithmetic expression")
+        expect(error().message) |> to(eq "bad argument in arithmetic expression")
       end
 
       it "has pipe info" do
-        expect(error().pipe).to eq({AddOne, :call, %{a: :add_one, b: :b, c: :c, o1: 1}})
+        expect(error().pipe) |> to(eq {AddOne, :call, %{a: :add_one, b: :b, c: :c, o1: 1}})
       end
 
       it "has struct info" do
-        expect(error().struct[:number]).to eq(:not_a_number)
+        expect(error().struct[:number]) |> to(eq :not_a_number)
       end
     end
   end
@@ -87,10 +87,10 @@ defmodule ModulePipelineSyncSpec do
     end
 
     it "returns 3" do
-      expect(shared.output1.number).to eq(3)
-      expect(shared.output2.number).to eq(3)
-      expect(shared.output3.number).to eq(3)
-      expect(shared.output4.number).to eq(3)
+      expect(shared.output1.number) |> to(eq 3)
+      expect(shared.output2.number) |> to(eq 3)
+      expect(shared.output3.number) |> to(eq 3)
+      expect(shared.output4.number) |> to(eq 3)
     end
   end
 end

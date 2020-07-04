@@ -10,7 +10,7 @@ defmodule PerallelSpec do
   it "takes ~0.5 sec for 1 call" do
     func = fn -> result(pipeline()) end
     time = :timer.tc(func) |> elem(0)
-    expect(time).to be :>, 500_000
+    expect(time) |> to(be :>, 500_000)
   end
 
   context "4 parallel calls" do
@@ -25,7 +25,7 @@ defmodule PerallelSpec do
 
     it "takes ~0.5 sec for 4 parallel calls" do
       time = :timer.tc(func()) |> elem(0)
-      expect(time).to be_between(500_000, 600_000)
+      time |> should(be_between(500_000, 600_000))
     end
   end
 end

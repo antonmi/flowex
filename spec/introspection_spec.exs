@@ -12,10 +12,10 @@ defmodule IntrospectionSpec do
     describe ".pipe_info" do
       it "returns pipe info" do
         pipe_info = InitOptsFunPipeline.pipe_info(:component)
-        expect(pipe_info[:name]).to eq(:component)
-        expect(pipe_info[:count]).to eq(2)
-        expect(pipe_info[:opts]).to eq(%{from_opts: 3})
-        expect(pipe_info[:type]).to eq(:pipe)
+        expect(pipe_info[:name]) |> to(eq :component)
+        expect(pipe_info[:count]) |> to(eq 2)
+        expect(pipe_info[:opts]) |> to(eq %{from_opts: 3})
+        expect(pipe_info[:type]) |> to(eq :pipe)
       end
     end
   end
@@ -31,10 +31,10 @@ defmodule IntrospectionSpec do
     describe ".pipe_info" do
       it "returns pipe info" do
         pipe_info = InitOptsModulePipeline.pipe_info(OptComponent)
-        expect(pipe_info[:name]).to eq(OptComponent)
-        expect(pipe_info[:count]).to eq(2)
-        expect(pipe_info[:opts]).to eq(%{from_opts: 3})
-        expect(pipe_info[:type]).to eq(:pipe)
+        expect(pipe_info[:name]) |> to(eq OptComponent)
+        expect(pipe_info[:count]) |> to(eq 2)
+        expect(pipe_info[:opts]) |> to(eq %{from_opts: 3})
+        expect(pipe_info[:type]) |> to(eq :pipe)
       end
     end
   end

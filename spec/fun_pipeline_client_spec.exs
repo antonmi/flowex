@@ -21,7 +21,7 @@ defmodule FunPipelineClientSpec do
       let_ok :client_pid, do: Flowex.Client.start(pipeline())
       let :result, do: Flowex.Client.call(client_pid(), %FunPipeline{number: 2})
 
-      it do: expect(result().number) |> to(eq 3)
+      it do: result().number |> should(eq 3)
 
       it "sets a, b, c" do
         assert result().a == :a

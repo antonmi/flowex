@@ -25,7 +25,7 @@ defmodule WithoutErrorPipeSpec do
     end
 
     it "raises exception" do
-      expect(func()).to raise_exception(Flowex.PipelineError)
+      expect(func()) |> to(raise_exception(Flowex.PipelineError))
     end
   end
 end

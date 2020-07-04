@@ -25,24 +25,24 @@ defmodule WithErrorPipeSpec do
   end
 
   it "return struct with error" do
-    expect(result().__struct__).to eq(Pipeline)
-    expect(result().error.__struct__).to eq(Flowex.PipeError)
-    expect(result().error.error).to eq(%ArithmeticError{message: "error"})
+    expect(result().__struct__) |> to(eq Pipeline)
+    expect(result().error.__struct__) |> to(eq Flowex.PipeError)
+    expect(result().error.error) |> to(eq %ArithmeticError{message: "error"})
   end
 
   context "checks error" do
     let :error, do: result().error
 
     it "has message" do
-      expect(error().message).to eq("error")
+      expect(error().message) |> to(eq "error")
     end
 
     it "has pipe info" do
-      expect(error().pipe).to eq({WithErrorPipeSpec.Pipeline, :one, %{}})
+      expect(error().pipe) |> to(eq {WithErrorPipeSpec.Pipeline, :one, %{}})
     end
 
     it "has struct info" do
-      expect(error().struct).to eq(%{data: nil, error: nil})
+      expect(error().struct) |> to(eq %{data: nil, error: nil})
     end
   end
 end
